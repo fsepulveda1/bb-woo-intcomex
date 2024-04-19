@@ -1,0 +1,19 @@
+{
+    "name": "bigbuda/bb-woo-intcomex",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "Bigbuda\\BbWooIntcomex\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Francisco",
+            "email": "francisco@bigbuda.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
