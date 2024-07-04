@@ -81,7 +81,7 @@ class SettingsPage {
 
 
         add_settings_section(
-            'bwi_section_redis',
+            'bwi_section_intcomex_general',
             __('Configuraciones generales de la integración', 'bwi'),
             [$this, 'bwi_section_cb'],
             'bwi-settings'
@@ -92,9 +92,40 @@ class SettingsPage {
             __('Margen de ganancia', 'bwi'),
             [$this, 'field_text'],
             'bwi-settings',
-            'bwi_section_redis',
+            'bwi_section_intcomex_general',
             [
                 'label_for' => 'field_redis_host',
+                'class' => 'row',
+            ]
+        );
+
+        add_settings_section(
+            'bwi_section_icecat',
+            __('Configuración API ICECAT', 'bwi'),
+            [$this, 'bwi_section_cb'],
+            'bwi-settings'
+        );
+
+        add_settings_field(
+            'field_icecat_username',
+            __('Username', 'bwi'),
+            [$this, 'field_text'],
+            'bwi-settings',
+            'bwi_section_icecat',
+            [
+                'label_for' => 'field_icecat_username',
+                'class' => 'row',
+            ]
+        );
+
+        add_settings_field(
+            'field_icecat_password',
+            __('Password', 'bwi'),
+            [$this, 'field_text'],
+            'bwi-settings',
+            'bwi_section_icecat',
+            [
+                'label_for' => 'field_icecat_password',
                 'class' => 'row',
             ]
         );
@@ -105,11 +136,11 @@ class SettingsPage {
     public function field_text($args) {
         ?>
         <input
-            type="<?= esc_attr($args['type'] ?? 'text') ?>"
-            class="regular-text"
-            id="<?php echo esc_attr( $args['label_for'] ); ?>"
-            name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
-            value='<?= $this->options[$args['label_for']] ?? "" ?>'
+                type="<?= esc_attr($args['type'] ?? 'text') ?>"
+                class="regular-text"
+                id="<?php echo esc_attr( $args['label_for'] ); ?>"
+                name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
+                value='<?= $this->options[$args['label_for']] ?? "" ?>'
         >
 
         <?php
@@ -119,11 +150,11 @@ class SettingsPage {
         ?>
         <label for="<?php echo esc_attr( $args['label_for'] ); ?>">
             <input
-                type="checkbox"
-                class="regular-text"
-                id="<?php echo esc_attr( $args['label_for'] ); ?>"
-                name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
-                value='yes'
+                    type="checkbox"
+                    class="regular-text"
+                    id="<?php echo esc_attr( $args['label_for'] ); ?>"
+                    name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
+                    value='yes'
                 <?php echo isset($this->options[$args['label_for']]) ? 'checked' : '' ?>
             >
             Activar
@@ -166,5 +197,12 @@ class SettingsPage {
         <?php
     }
 
+    public function importers_page() {
+
+    }
+
+    public function logs_page() {
+
+    }
 
 }
