@@ -70,6 +70,7 @@
                                 break;
                             case 'ERROR':
                                 progressBar.width(0);
+                                window.onbeforeunload = null;
                                 break;
                         }
 
@@ -94,7 +95,7 @@
                                 form.find('input').attr('disabled',false);
                                 form.find('select').attr('disabled',false);
                                 importerTabs.removeClass('disabled');
-
+                                window.onbeforeunload = null;
                                 break;
                             case 'NEXT':
                                 form.find("input[name='page']").val(newFormData.page);
@@ -110,6 +111,7 @@
                                 form.find('input').attr('disabled',false);
                                 form.find('select').attr('disabled',false);
                                 importerTabs.removeClass('disabled');
+                                window.onbeforeunload = null;
 
                                 break;
                         }

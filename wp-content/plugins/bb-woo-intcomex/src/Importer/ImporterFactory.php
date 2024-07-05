@@ -5,6 +5,8 @@ namespace Bigbuda\BbWooIntcomex\Importer;
 use Bigbuda\BbWooIntcomex\Importer\Importers\ExtendedCatalogImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\IceCatImagesImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\ImporterInterface;
+use Bigbuda\BbWooIntcomex\Importer\Importers\InventoryImporter;
+use Bigbuda\BbWooIntcomex\Importer\Importers\PricesImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\ProductImporter;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
@@ -27,6 +29,8 @@ class ImporterFactory {
     const IMPORTERS = [
         'product' => ProductImporter::class,
         'icecat_images' => IceCatImagesImporter::class,
+        'product_inventory' => InventoryImporter::class,
+        'product_prices' => PricesImporter::class,
         'extended_catalog' => ExtendedCatalogImporter::class
     ];
 

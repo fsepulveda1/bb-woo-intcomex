@@ -59,6 +59,14 @@ class IntcomexAPI {
         return $this->request('/v1/getcatalog');
     }
 
+    public function getInventory() {
+        return $this->request('/v1/getinventory');
+    }
+
+    public function getPriceList() {
+        return $this->request('/v1/getpricelist');
+    }
+
     public function getExtendedCatalog() {
         return $this->request('/v1/downloadextendedcatalog?locale=es&format=json');
     }

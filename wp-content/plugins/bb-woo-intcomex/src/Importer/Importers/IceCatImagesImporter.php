@@ -8,7 +8,7 @@ use WP_Term;
 
 class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
 
-    public int $rowsPerPage = 30;
+    public int $rowsPerPage = 50;
 
     public function count():int
     {
@@ -46,24 +46,29 @@ class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
 
                 if($brand && $mpn) {
                     $xml = $this->iceCatAPI->getArticleByMPN($brand->name, $mpn);
-                    $data = $this->iceCatAPI->xml2array($xml);
-                    $this->iceCatAPI->getProductData($data);
-                    $productDataAttrs = $this->iceCatAPI->getProductDataAttributes();
-                    $productDataDesc = $this->iceCatAPI->getProductDescriptions();
-                    if(!empty($productDataAttrs['ErrorMessage'])) {
-                        $errors[] = $productDataAttrs['ErrorMessage']. " (".$brand->name.",".$mpn.")";
+                    if($this->iceCatAPI->isValidProduct($xml)) {
+                        $data = $this->iceCatAPI->xml2array($xml);
+                        $this->iceCatAPI->getProductData($data);
+                        $productDataAttrs = $this->iceCatAPI->getProductDataAttributes();
+                        $productDataDesc = $this->iceCatAPI->getProductDescriptions();
+                        $productImages = $this->iceCatAPI->getProductImages();
+
+                        if(is_array($productImages) and isset($productImages['HighPic'])) {
+                            SyncHelper::setProductImages($productImages['HighPic'],$product,true);
+                        }
+                        //$description = '<p>' . str_replace(' - ', "<br>", $productDataDesc[0] ?? "") . '</p>';
+                        //$product->set_description($description);
+
+                        $product->save();
                     }
                     else {
-                        //wp_send_json_error(['desc' => $productDataDesc ,'rs' => $productDataAttrs]);
-                        //$errors[] = $xml->attributes('ErrorMessage');
+                        $errors[] = $productDataAttrs['ErrorMessage']. " (".$brand->name.",".$mpn.")";
                     }
-
-                    $processed++;
                 }
                 else {
                     $errors[] = 'El producto no tiene marca o mpn asociado';
                 }
-
+                $processed++;
             }
         }
 

@@ -61,7 +61,7 @@ class ImportersPage {
             [
                 'title' => __('Sincronizar lista de precios', 'bwi'),
                 'description' => __('Sincronización de datos de productos desde Icecat a Woocommerce.','bwi'),
-                'type' => 'product_images',
+                'type' => 'product_prices',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
                 'fields' => []
@@ -69,7 +69,7 @@ class ImportersPage {
             [
                 'title' => __('Sincronizar inventario', 'bwi'),
                 'description' => __('Sincronización de datos de productos desde Icecat a Woocommerce.','bwi'),
-                'type' => 'product_images',
+                'type' => 'product_inventory',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
                 'fields' => []

@@ -22,28 +22,26 @@ class SyncHelper {
 
             $category = $data->Category;
             $brand = $data->Brand;
-            $stock = $data->InStock ?? null;
             $productCat = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
             $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'marcas') : null;
+
+            $freight = $data->Freight;
+            $freightPackage = $freight->Package;
+            $product->set_weight($freightPackage->Weight * 0.4535);
+            $product->set_height($freightPackage->Height);
+            $product->set_width($freightPackage->Width);
 
             $product->set_name($data->Description);
             $product->set_status('publish');
             $product->set_catalog_visibility('visible');
-            //$product->set_price($data->Precio);
-            //$product->set_regular_price($data->Precio);
             $product->set_manage_stock(true);
-            $product->set_stock_quantity($stock);
-            $product->set_sold_individually(false);
-            //$product->set_weight((float) $data->Peso);
-            //$product->set_description($data->Descrip_lista);
-            if ($stock > 0) {
-                $product->set_stock_status();
-            } else {
-                $product->set_stock_status('outofstock');
+            if($action == 'create') {
+                $product->set_stock_quantity(0);
             }
+            $product->set_sold_individually(false);
             $product->set_sku($data->Sku);
             $product->set_downloadable(false);
-            $product->set_virtual(false);
+            $product->set_virtual(!$data->Type == 'Physical');
             $product->set_category_ids([$productCat]);
             if($brandCat) {
                 wp_set_object_terms($product->get_id(), [(int)$brandCat], 'marcas');
@@ -87,6 +85,43 @@ class SyncHelper {
         }
 
         return $importerResponse;
+    }
+
+    public static function syncProductInventory($intcomexProduct) {
+        $response = new ImporterResponse();
+        if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
+            $stock = $intcomexProduct->InStock;
+            $product = wc_get_product($existentProduct->ID);
+            $product->set_stock_quantity($stock);
+            if($stock > 0) {
+                $product->set_stock_status('outofstock');
+            }
+            else {
+                $product->set_stock_status();
+            }
+            $product->save();
+        }
+        else {
+            $response->addError('No se encontró un producto con sku '.$intcomexProduct->Sku);
+        }
+        return $response;
+    }
+
+    public static function syncProductPrice($intcomexProduct, $USD2CLP) {
+        $response = new ImporterResponse();
+        if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
+            $CLPPrice = ceil($intcomexProduct->Price->UnitPrice * $USD2CLP);
+            $product = wc_get_product($existentProduct->ID);
+            $product->set_price($CLPPrice);
+            $product->set_regular_price($CLPPrice);
+            $product->update_meta_data('_intcomex_price', $existentProduct->Price->UnitPrice ?? null);
+            $product->update_meta_data('_intcomex_price_cur', $existentProduct->Price->CurrencyId ?? null);
+            $product->save();
+        }
+        else {
+            $response->addError('No se encontró un producto con sku '.$intcomexProduct->Sku);
+        }
+        return $response;
     }
     public static function getTermByExternalId($taxonomy,$intcomexId) {
         $term_query = new WP_Term_Query(array(
@@ -150,17 +185,12 @@ class SyncHelper {
      * @param \WC_Product $product
      * @return void
      */
-    public static function setProductImages($url, \WC_Product $product, $isMain) {
+    public static function setProductImages($url, \WC_Product $product, $isMain = true) {
         //Remove old images if exists
         self::removeProductImages($product);
-
         if($url != "") {
             $pathParts = explode("/",$url);
             $filenameWithExtension = end($pathParts);
-            $filenameParts = explode(".", $filenameWithExtension);
-            $extension = end($filenameParts);
-            $filename = $filenameParts[0];
-            $baseUrl = str_replace($filenameWithExtension,"",$url);
 
             if($image_id = self::uploadFile($url,$filenameWithExtension, $product->get_id(), false)) {
                 if($isMain) {
