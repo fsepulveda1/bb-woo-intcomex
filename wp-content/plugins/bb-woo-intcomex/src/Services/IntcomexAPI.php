@@ -2,6 +2,7 @@
 
 namespace Bigbuda\BbWooIntcomex\Services;
 
+use Automattic\WooCommerce\Blocks\Options;
 use GuzzleHttp\Client;
 
 class IntcomexAPI {
@@ -27,9 +28,9 @@ class IntcomexAPI {
     public function __construct()
     {
         $options = get_option('bwi_options');
-        $this->apiKey = $options['field_api_key'];
-        $this->apiSecret = $options['field_api_secret'];
-        $this->host = $options['field_api_host'];
+        $this->apiKey = $options['field_api_key'] ?? "";
+        $this->apiSecret = $options['field_api_secret'] ?? "";
+        $this->host = $options['field_api_host'] ?? "";
         $this->utcDate = gmdate('Y-m-d\TH:i:s\Z');
 
         $token = sprintf('Bearer apiKey=%s&utcTimeStamp=%s&signature=%s',
@@ -71,9 +72,133 @@ class IntcomexAPI {
         return $this->request('/v1/downloadextendedcatalog?locale=es&format=json');
     }
 
+    /**
+     * @param array{
+     *      OrderNumber: string,
+     *      LocationId: string,
+     *      Tag: string,
+     *      CustomerOrderNumber: string,
+     *      Total: numeric,
+     *      Discounts: numeric,
+     *      DiscountType: string,
+     *      CouponCodes : string[],
+     *      TaxRegistrationNumber: string,
+     *      InvoiceRequested: bool,
+     *      ReceiveInvoiceByMail: bool,
+     *      StoreOrder: object,
+     *      Payments: array,
+     *      Shipments: array,
+     *      Items: array,
+     *      TaxesIncludedInPrice: bool,
+     *      Attachments: array,
+     *      Options: array,
+     *      AddressId: array
+     *  } $params
+     * @return array|mixed
+     */
+    public function placeOrder(array $params) {
+        return $this->post('/v1/placeorder', $params);
+    }
+
+    public function processOrder(array $params) {
+        return $this->post('/v1/processorder', $params);
+    }
+
+    public function getOrder($orderNumber) {
+        return $this->request('/v1/getorder?orderNumber='.$orderNumber);
+    }
+
+    public function getOrderStatus($orderNumber) {
+        return $this->request('/v1/getorderstatus?orderNumber='.$orderNumber);
+    }
+
+    public function getOrderList($orderNumber) {
+        return $this->request('/v1/getorders');
+    }
+
+    /**
+     * @param array{OrderNumber: string, Payments: array} $params
+     * @return array|mixed
+     */
+    public function registerOrderPayments(array $params) {
+        return $this->post('/v1/registerpayments', $params);
+    }
+
+    /**
+     * @param array{OrderNumber: string} $params
+     * @return array|mixed
+     */
+    public function releaseOrder(array $params) {
+        return $this->post('/v1/releaseOrder', $params);
+    }
+
+    /**
+     * @param array{OrderNumber: string} $params
+     * @return array|mixed
+     */
+    public function cancelOrder(array $params) {
+        return $this->post('/v1/cancelorder', $params);
+    }
+
+    /**
+     * @param array{OrderNumber: string} $params
+     * @return array|mixed
+     */
+    public function updateOrder(array $params) {
+        return $this->post('/v1/updateorder', $params);
+    }
+
+    public function getInvoice($orderNumber,$invoiceNumber) {
+        return $this->request(
+            sprintf(
+                '/v1/getinvoice?invoiceNumber=%s&orderNumber=%s',
+                $invoiceNumber,
+                $orderNumber
+            )
+        );
+    }
+
+    public function downloadAttachment($orderNumber,$attachmentId) {
+        return $this->request(
+            sprintf(
+                '/v1/downloadattachment?orderNumber=%s&attachmentId=%s&downloadFile=1',
+                $orderNumber,
+                $attachmentId
+            )
+        );
+    }
+
+    /**
+     * @param array{
+     *     LocationId: string,
+     *     Items: array,
+     *     AddressId: array
+     * } $params
+     * @return array|mixed
+     */
+    public function calculateShippingRates(array $params) {
+        return $this->post('/v1/calculateshippingrates', $params);
+    }
+
+
     public function request($uri) {
         try {
             $response = $this->client->get($uri);
+            $content = $response->getBody()->getContents();
+            $content = json_decode($content);
+        }
+        catch (\Exception $e) {
+            $content = (array) $e;
+        }
+        return $content;
+    }
+
+    public function post($uri, $params) {
+
+        try {
+            $response = $this->client->post($uri,[
+                'body' => json_encode($params)
+            ]);
             $content = $response->getBody()->getContents();
             $content = json_decode($content);
         }

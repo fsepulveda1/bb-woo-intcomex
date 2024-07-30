@@ -24,9 +24,11 @@ class PricesImporter extends BaseImporter implements ImporterInterface  {
         $intcomexProductsChunks = get_transient('bwi_product_prices_chunks_'.$page-1);
         $errors = [];
         $processed = 0;
+        $USD2CLP = getUsdValue();
+        $profitMargin = $this->options['field_profit_margin'];
         foreach ($intcomexProductsChunks[$page-1] as $intcomexProduct) {
             $processed++;
-            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct,935.24);
+            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct,$USD2CLP,$profitMargin);
 
             if($importerResponse->isError()) {
                 $errors = array_merge($errors, $importerResponse->getErrors());

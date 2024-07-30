@@ -23,7 +23,7 @@ class SettingsPage {
     public function settings_menu() {
 
         add_menu_page(
-            'Intcomex',
+            'Configuración Incomex - Icecat',
             'Intcomex',
             'manage_options',
             'bwi-settings',
@@ -38,7 +38,7 @@ class SettingsPage {
 
         add_settings_section(
             'bwi_section',
-            __('Configuración API Intcomex', 'bwi'),
+            __('Configuración Intcomex API', 'bwi'),
             [$this, 'bwi_section_cb'],
             'bwi-settings'
         );
@@ -88,20 +88,22 @@ class SettingsPage {
         );
 
         add_settings_field(
-            'field_redis_host',
-            __('Margen de ganancia', 'bwi'),
+            'field_profit_margin',
+            __('Margen de ganancia (%)', 'bwi'),
             [$this, 'field_text'],
             'bwi-settings',
             'bwi_section_intcomex_general',
             [
-                'label_for' => 'field_redis_host',
+                'type' => 'number',
+                'label_for' => 'field_profit_margin',
                 'class' => 'row',
+                'min' => 0,
             ]
         );
 
         add_settings_section(
             'bwi_section_icecat',
-            __('Configuración API ICECAT', 'bwi'),
+            __('Configuración Icecat API', 'bwi'),
             [$this, 'bwi_section_cb'],
             'bwi-settings'
         );
@@ -137,6 +139,8 @@ class SettingsPage {
         ?>
         <input
                 type="<?= esc_attr($args['type'] ?? 'text') ?>"
+                <?= isset($args['min'])? 'min="'.esc_attr($args['min']).'"' : ""; ?>
+                <?= isset($args['max']) ? 'max="'.esc_attr($args['max']).'"' : ""; ?>
                 class="regular-text"
                 id="<?php echo esc_attr( $args['label_for'] ); ?>"
                 name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
@@ -179,20 +183,21 @@ class SettingsPage {
 
         settings_errors( 'bwi_messages' );
         ?>
-
-
-        <div class="notice notice-warning is-dismissible">
-            <p>Completa los campos a continuación para conectar Woocommerce con Intcomex.</p>
-        </div>
-        <div class="wrap">
-            <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-            <form action="options.php" method="post">
-                <?php
-                settings_fields( 'bwi' );
-                do_settings_sections( 'bwi-settings' );
-                submit_button( 'Guardar Configuración' );
-                ?>
-            </form>
+        <div class="wrap h-100 container">
+            <h1 class="mb-3"><?php echo esc_html( get_admin_page_title() ); ?></h1>
+            <div class="bg-light rounded h-100 p-5">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form action="options.php" method="post" class="bwi_config_form">
+                            <?php
+                            settings_fields( 'bwi' );
+                            do_settings_sections( 'bwi-settings' );
+                            submit_button( 'Guardar Configuración' );
+                            ?>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
     }

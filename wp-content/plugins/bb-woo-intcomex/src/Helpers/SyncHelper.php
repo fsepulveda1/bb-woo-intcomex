@@ -26,10 +26,12 @@ class SyncHelper {
             $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'marcas') : null;
 
             $freight = $data->Freight;
-            $freightPackage = $freight->Package;
-            $product->set_weight($freightPackage->Weight * 0.4535);
-            $product->set_height($freightPackage->Height);
-            $product->set_width($freightPackage->Width);
+            if($freightPackage = $freight->Package ?? null) {
+                $product->set_weight(number_format($freightPackage->Weight * 0.4535, '1', '.'));
+                $product->set_height(number_format($freightPackage->Height * 2.54, '1', '.'));
+                $product->set_width(number_format($freightPackage->Width * 2.54, '1', '.'));
+                $product->set_length($freightPackage->Length ?? null);
+            }
 
             $product->set_name($data->Description);
             $product->set_status('publish');
@@ -46,6 +48,9 @@ class SyncHelper {
             if($brandCat) {
                 wp_set_object_terms($product->get_id(), [(int)$brandCat], 'marcas');
             }
+
+            $freightItem = $freight->Item ?? [];
+            $product->update_meta_data('_freight_item', json_encode($freightItem));
             $product->update_meta_data('_mpn', $data->Mpn);
 
             $product->save();
@@ -59,7 +64,7 @@ class SyncHelper {
         return $importerResponse;
     }
 
-    public static function addExtendedProductInfo($data): ImporterResponse {
+    public static function addExtendedProductInfo($data, $forceUpdate = false): ImporterResponse {
         $importerResponse = new ImporterResponse();
         $importerResponse->setData($data);
 
@@ -68,11 +73,32 @@ class SyncHelper {
                 $importerResponse->setAction('update');
                 $product = wc_get_product($existentProduct->ID);
 
+                $values = [];
+                foreach((array) $data as $key => $item) {
+                    $header = explode('/',$key);
+                    if(count($header) > 1) {
+                        $values[$header[0]][$header[1]] = $item;
+                    }
+                }
+
+                if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
+                    $product->update_meta_data('_intcomex_attrs', $values);
+                }
+
                 if(!empty($data->Imagenes)) {
-                    $counter = 0;
-                    foreach($data->Imagenes as $img) {
-                        self::setProductImages($img->url, $product, $counter==0);
-                        $counter++;
+                    $mainImg = $data->Imagenes[0];
+                    unset($data->Imagenes[0]);
+
+                    if(!$product->get_image_id() || $forceUpdate) {
+                        self::removeProductImages($product);
+                        self::setProductImages(urldecode($mainImg->url), $product);
+                    }
+
+                    if(!count($product->get_gallery_image_ids()) || $forceUpdate) {
+                        self::removeProductImages($product,'gallery');
+                        foreach($data->Imagenes as $img) {
+                            self::setProductImages(urldecode($img->url), $product, false);
+                        }
                     }
                 }
             } else {
@@ -107,14 +133,17 @@ class SyncHelper {
         return $response;
     }
 
-    public static function syncProductPrice($intcomexProduct, $USD2CLP) {
+    public static function syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin) {
         $response = new ImporterResponse();
         if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
             $CLPPrice = ceil($intcomexProduct->Price->UnitPrice * $USD2CLP);
+            $CLPFinalPrice = ceil($CLPPrice * ($profitMargin/100));
+
             $product = wc_get_product($existentProduct->ID);
-            $product->set_price($CLPPrice);
-            $product->set_regular_price($CLPPrice);
+            $product->set_price($CLPFinalPrice);
+            $product->set_regular_price($CLPFinalPrice);
             $product->update_meta_data('_intcomex_price', $existentProduct->Price->UnitPrice ?? null);
+            $product->update_meta_data('_intcomex_price_clp', $CLPPrice);
             $product->update_meta_data('_intcomex_price_cur', $existentProduct->Price->CurrencyId ?? null);
             $product->save();
         }
@@ -166,6 +195,10 @@ class SyncHelper {
     {
         $productCat = self::getTermByExternalId($taxonomy, $id);
         if (!$productCat) {
+            if($term = get_term_by('name',$description,$taxonomy)) {
+                return $term->term_id;
+            }
+
             $newCat = wp_insert_term($description, $taxonomy);
             if (is_array($newCat)) {
                 add_term_meta($newCat['term_id'], '_intcomex_id', $id);
@@ -183,28 +216,32 @@ class SyncHelper {
      * Setea las imágenes del producto a partir de la url de un producto de la BD manager
      * @param $url
      * @param \WC_Product $product
-     * @return void
+     * @return boolean
      */
     public static function setProductImages($url, \WC_Product $product, $isMain = true) {
-        //Remove old images if exists
-        self::removeProductImages($product);
-        if($url != "") {
-            $pathParts = explode("/",$url);
-            $filenameWithExtension = end($pathParts);
-
-            if($image_id = self::uploadFile($url,$filenameWithExtension, $product->get_id(), false)) {
-                if($isMain) {
-                    $product->set_image_id($image_id);
-                }
-                else {
-                    $gallery_images_ids = $product->get_gallery_image_ids();
-                    $gallery_images_ids[] = $image_id;
-                    $product->set_gallery_image_ids($gallery_images_ids);
-                }
-            }
-            $product->save();
+        if(empty($url)) {
+            return false;
         }
+        $pathParts = explode("/",$url);
+        $filenameWithExtension = end($pathParts);
+
+        if(!$image_id = self::uploadFile($url,$filenameWithExtension, $product->get_id(), false)) {
+            return false;
+        }
+
+        if($isMain) {
+            $product->set_image_id($image_id);
+        }
+        else {
+            $gallery_images_ids = $product->get_gallery_image_ids();
+            $gallery_images_ids[] = $image_id;
+            $product->set_gallery_image_ids($gallery_images_ids);
+        }
+
+        $product->save();
+        return true;
     }
+
 
 
     /**
@@ -212,17 +249,20 @@ class SyncHelper {
      * @param $product
      * @return void
      */
-    public static function removeProductImages($product) {
-        $featured_image_id = $product->get_image_id();
-        $image_galleries_id = $product->get_gallery_image_ids();
-
-        if( !empty( $featured_image_id ) ) {
-            wp_delete_post( $featured_image_id );
+    public static function removeProductImages($product, $type = 'featured') {
+        if($type == 'featured' || $type == 'all') {
+            $featured_image_id = $product->get_image_id();
+            if (!empty($featured_image_id)) {
+                wp_delete_post($featured_image_id);
+            }
         }
 
-        if( !empty( $image_galleries_id ) ) {
-            foreach( $image_galleries_id as $single_image_id ) {
-                wp_delete_post( $single_image_id );
+        if($type == 'gallery' || $type == 'all') {
+            $image_galleries_id = $product->get_gallery_image_ids();
+            if (!empty($image_galleries_id)) {
+                foreach ($image_galleries_id as $single_image_id) {
+                    wp_delete_post($single_image_id);
+                }
             }
         }
     }

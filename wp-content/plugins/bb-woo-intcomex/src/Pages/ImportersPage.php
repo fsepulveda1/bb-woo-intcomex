@@ -19,7 +19,6 @@ class ImportersPage {
 
     public function __construct()
     {
-        add_action('admin_enqueue_scripts', [$this, 'admin_scripts']);
         add_action('admin_menu', [$this, 'settings_menu']);
         add_action('wp_ajax_process_script', [$this, 'process_script']);
     }
@@ -40,6 +39,8 @@ class ImportersPage {
             return;
         }
 
+        $options = get_option('bwi_options');
+
         /** TODO get importers from importer factory */
         $importers = [
             [
@@ -56,7 +57,14 @@ class ImportersPage {
                 'type' => 'extended_catalog',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
-                'fields' => []
+                'fields' => [
+                    [
+                        'type' => 'checkbox',
+                        'name' => 'force_update',
+                        'label' => 'Forzar actualización',
+                        'description' => 'Si se marca esta opción, se eliminarán imágenes y atributos de los productos existentes para reemplazarlos por nuevos valores.'
+                    ]
+                ]
             ],
             [
                 'title' => __('Sincronizar lista de precios', 'bwi'),
@@ -64,7 +72,12 @@ class ImportersPage {
                 'type' => 'product_prices',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
-                'fields' => []
+                'fields' => [],
+                'info' => [
+                    'Dólar observado' => '$'.getUsdValue(),
+                    'Fecha de actualización dolar' => \DateTime::createFromFormat('Y-m-d',get_option('USD2CLP_date'))->format('d-m-Y'),
+                    'Margen de ganancia' => ($options['field_profit_margin'] ?? 0).'%'
+                ]
             ],
             [
                 'title' => __('Sincronizar inventario', 'bwi'),
@@ -85,20 +98,6 @@ class ImportersPage {
         ];
 
         include_once BWI_DIR."/templates/page-sync.php";
-    }
-
-    public function admin_scripts() {
-        wp_enqueue_style('bootstrap','https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css');
-        wp_enqueue_script('bootstrap','https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js');
-
-        wp_enqueue_style('bwi-main', BWI_URL . '/assets/css/main.css');
-        wp_enqueue_script( 'bwi-ajax', BWI_URL . '/assets/js/main.js', array(), "1.0", true );
-        wp_localize_script( 'bwi-ajax', 'bwi_ajax_values',
-            array(
-                'ajax_url' => admin_url( 'admin-ajax.php' ),
-                'ajax_nonce' => wp_create_nonce( '_ajax_nonce' ),
-            )
-        );
     }
 
     /**

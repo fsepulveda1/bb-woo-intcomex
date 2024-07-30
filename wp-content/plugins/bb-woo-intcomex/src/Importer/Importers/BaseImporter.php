@@ -5,20 +5,23 @@ namespace Bigbuda\BbWooIntcomex\Importer\Importers;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
 
- class BaseImporter {
-    public int $rowsPerPage = 50;
-     public IntcomexAPI $intcomexAPI;
-     public IceCatAPI $iceCatAPI;
+class BaseImporter {
 
-    public function __construct(IntcomexAPI $intcomexAPI, IceCatAPI $iceCatAPI)
+    public array $options;
+    public int $rowsPerPage = 50;
+    public IntcomexAPI $intcomexAPI;
+    public IceCatAPI $iceCatAPI;
+
+    public function __construct(IntcomexAPI $intcomexAPI, IceCatAPI $iceCatAPI, array $options)
     {
         $this->intcomexAPI = $intcomexAPI;
         $this->iceCatAPI = $iceCatAPI;
+        $this->options = $options;
     }
 
     public function getRowsPerPage(): int
     {
         return $this->rowsPerPage;
     }
-    
+
 }

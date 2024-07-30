@@ -4,7 +4,7 @@
  */
 
 ?>
-<div class="wrap h-100 container">
+<div class="wrap h-100 container" id="bwi-page">
     <h1 class="mb-3"><?php echo esc_html(get_admin_page_title()); ?></h1>
     <br>
 
@@ -90,10 +90,22 @@
                                         </div>
                                     </div>
 
+                                    <?php if(isset($importer['info'])): ?>
+                                        <ul class="bwi_importer__detail_items">
+                                            <?php foreach($importer['info'] as $label => $field): ?>
+                                                <li>
+                                                    <strong><?= $label ?>:</strong>
+                                                    <span><?= $field ?></span>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif ?>
+
                                     <button type="submit" class="btn btn-primary">
                                         <?= __("Iniciar", "bwi") ?>
                                     </button>
                                 </div>
+
                                 <div class="form-group">
                                     <div class="bwi_importer__log"></div>
                                 </div>

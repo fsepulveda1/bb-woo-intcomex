@@ -34,4 +34,48 @@
   display: none;
 }
 
+.bwi_importer__detail_items {
+  background: white;
+  display: block;
+  padding: 0.5rem;
+  border-radius: 4px;
+  max-width: 300px;
+}
+.bwi_importer__detail_items li {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+
+.bwi_config_form {
+  max-width: 600px;
+}
+.bwi_config_form h2 {
+  font-size: 1.25rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+  margin-top: 3rem;
+}
+.bwi_config_form h2:first-of-type {
+  margin-top: 0;
+}
+.bwi_config_form table tr.row {
+  display: table-row !important;
+}
+.bwi_config_form table tr.row th {
+  min-width: 200px;
+}
+.bwi_config_form table tr.row td input {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group small {
+  font-size: 12px;
+  display: block;
+  color: #666;
+}
+
 /*# sourceMappingURL=main.css.map */

@@ -11,6 +11,7 @@ use Bigbuda\BbWooIntcomex\Importer\Importers\ProductImporter;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
 use http\Exception;
+use ReflectionClass;
 
 /**
  * If this file is called directly, abort.
@@ -26,13 +27,7 @@ class ImporterFactory {
     public IntcomexAPI $intcomexAPI;
     public IceCatAPI $iceCatAPI;
 
-    const IMPORTERS = [
-        'product' => ProductImporter::class,
-        'icecat_images' => IceCatImagesImporter::class,
-        'product_inventory' => InventoryImporter::class,
-        'product_prices' => PricesImporter::class,
-        'extended_catalog' => ExtendedCatalogImporter::class
-    ];
+    public array $options;
 
     /**
      * @throws \Exception
@@ -40,7 +35,8 @@ class ImporterFactory {
     public function __construct($type) {
         $this->intcomexAPI = IntcomexAPI::getInstance();
         $this->iceCatAPI = new IceCatAPI();
-        $importerClass = self::IMPORTERS[$type];
+        $this->options = get_option('bwi_options');
+        $importerClass = self::getImporters()[$type];
         if($importerClass) {
             $this->setImporter($importerClass);
         }
@@ -49,13 +45,27 @@ class ImporterFactory {
         }
     }
 
+    /**
+     * TODO Refactor the list of importers using reflection class
+     * @return string[]
+     */
+    public static function getImporters() {
+        return [
+            'product' => ProductImporter::class,
+            'icecat_images' => IceCatImagesImporter::class,
+            'product_inventory' => InventoryImporter::class,
+            'product_prices' => PricesImporter::class,
+            'extended_catalog' => ExtendedCatalogImporter::class
+        ];
+    }
+
     public function setImporter($importerClass) {
-        $this->importer = new $importerClass($this->intcomexAPI, $this->iceCatAPI);
+        $this->importer = new $importerClass($this->intcomexAPI, $this->iceCatAPI, $this->options);
     }
 
     public function importBatch($form_data): array
     {
-        @ini_set('max_execution_time',300);
+        @ini_set('max_execution_time',600);
         $page = $form_data['page'];
         $rowsPerPage = $this->importer->getRowsPerPage();
 
@@ -63,7 +73,6 @@ class ImporterFactory {
             $total_rows = $this->importer->count();
             $form_data['total_pages'] = ceil($total_rows / $rowsPerPage);
             $form_data['total_rows'] = $total_rows;
-            //plugin_log('Sincronización iniciada','a',$form_data['log_file']);
         }
 
         $response = $this->importer->process($page, $form_data);

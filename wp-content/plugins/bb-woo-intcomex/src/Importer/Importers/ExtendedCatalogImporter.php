@@ -29,7 +29,9 @@ class ExtendedCatalogImporter extends BaseImporter implements ImporterInterface 
         $processed = 0;
         foreach ($intcomexProductsChunks[$page-1] as $intcomexProduct) {
             $processed++;
-            $importerResponse = SyncHelper::addExtendedProductInfo($intcomexProduct);
+
+            $importerResponse = SyncHelper::addExtendedProductInfo($intcomexProduct,$options['force_update']);
+
             if($importerResponse->isError()) {
                 $errors = array_merge($errors, $importerResponse->getErrors());
             }

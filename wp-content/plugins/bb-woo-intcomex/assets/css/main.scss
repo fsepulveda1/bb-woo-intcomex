@@ -1,40 +1,97 @@
-.notice-warning {
-  display: none !important;
-}
+  .notice-warning {
+    display: none !important;
+  }
 
-.nav {
-}
-.nav-item {
-  a {
-    padding: 1rem .75rem;
-    background-color: #ffffff;
-    color: black;
+  .nav {
+  }
 
-    &.active {
-      border: 1px solid #0d6efd;
-      position: relative;
-      &::after {
-        content: "";
-        width: 4px;
-        height: 100%;
-        left: 0;
-        top: 0;
-        position: absolute;
+  .nav-item {
+    a {
+      padding: 1rem .75rem;
+      background-color: #ffffff;
+      color: black;
+
+      &.active {
+        border: 1px solid #0d6efd;
+        position: relative;
+
+        &::after {
+          content: "";
+          width: 4px;
+          height: 100%;
+          left: 0;
+          top: 0;
+          position: absolute;
+        }
       }
     }
   }
-}
 
-.bwi_importer__log {
-  max-height: 300px;
-  overflow: auto;
-  padding: 1.5rem;
-  margin-top: 1rem;
-  background-color: #f1f1f1;
-  font-size: 14px;
-  color: #666;
-  border-radius: 5px;
-  &:empty {
-    display: none;
+  .bwi_importer__log {
+    max-height: 300px;
+    overflow: auto;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    background-color: #f1f1f1;
+    font-size: 14px;
+    color: #666;
+    border-radius: 5px;
+
+    &:empty {
+      display: none;
+    }
   }
-}
+
+  .bwi_importer__detail_items {
+    background: white;
+    display: block;
+    padding: .5rem;
+    border-radius: 4px;
+    max-width: 300px;
+
+    li {
+      font-size: 12px;
+      margin-bottom: 0;
+    }
+  }
+
+  .bwi_config_form {
+    max-width: 600px;
+
+    h2 {
+      font-size: 1.25rem;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: .5rem;
+      margin-bottom: 2rem;
+      margin-top: 3rem;
+
+      &:first-of-type {
+        margin-top: 0;
+      }
+    }
+
+    table tr.row {
+      display: table-row !important;
+
+      th {
+        min-width: 200px;
+      }
+
+      td {
+        input {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    small {
+      font-size: 12px;
+      display: block;
+      color: #666
+    }
+  }
+

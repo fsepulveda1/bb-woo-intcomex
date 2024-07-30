@@ -1,6 +1,35 @@
 (function ($) {
     $(document).ready(function() {
 
+        //TODO: Reorganize code
+        $(".get-order-form").on('submit', function(e) {
+            e.preventDefault();
+            $(this).find('button[type="submit"]').attr('disabled',true)
+            const formData = $(this).serialize()+"&ajax_nonce="+bwi_ajax_values.ajax_nonce;
+
+            $.ajax({
+                type: "POST",
+                url: bwi_ajax_values.ajax_url,
+                data: formData,
+                success: function (data) {
+
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    jqXHR.abort();
+                    if(textStatus==="timeout") {
+                        //stats.text("El servidor ha tardado mucho en responder");
+                    }
+                    else {
+                        //stats.text("Ha ocurrido un error");
+                    }
+                    $(this).find('button[type="submit"]').attr('disabled',false)
+                }
+            });
+        });
+        //ORDERS PAGE
+
+
+        //IMPORTER PAGE
         $(".import-ajax-form").on('submit', function(e) {
             e.preventDefault();
 
