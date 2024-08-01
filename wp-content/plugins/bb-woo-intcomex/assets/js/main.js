@@ -11,7 +11,22 @@
                 type: "POST",
                 url: bwi_ajax_values.ajax_url,
                 data: formData,
-                success: function (data) {
+                success: function (rs) {
+                    console.log(rs);
+                    $(this).find('button[type="submit"]').attr('disabled',false)
+                    const { data, status } = rs;
+                    let html = "<table class='table table-bordered'>";
+                    for (let key in data) {
+                        console.log(key, data[key]);
+                        if(typeof data[key] === 'object' && data[key] !== null) {
+                            html += `<tr><th colspan="2">${key}</th></tr><tr><td colspan="2">${JSON.stringify(data[key],null,'\t')}</td></tr>`;
+                        }
+                        else {
+                            html += `<tr><th>${key}</th><td>${data[key]}</td></tr>`;
+                        }
+                    }
+                    html += '</table>';
+                    $('#get-order-results').html(html);
 
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

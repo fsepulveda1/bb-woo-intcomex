@@ -96,8 +96,8 @@ class IntcomexAPI {
      *  } $params
      * @return array|mixed
      */
-    public function placeOrder(array $params) {
-        return $this->post('/v1/placeorder', $params);
+    public function placeOrder(array $params,$customerOrderNumber) {
+        return $this->post('/v1/placeorder?customerOrderNumber='.$customerOrderNumber, $params);
     }
 
     public function processOrder(array $params) {
@@ -141,7 +141,7 @@ class IntcomexAPI {
     }
 
     /**
-     * @param array{OrderNumber: string} $params
+     * @param array{Items: array,OrderNumber: string} $params
      * @return array|mixed
      */
     public function updateOrder(array $params) {
@@ -188,7 +188,7 @@ class IntcomexAPI {
             $content = json_decode($content);
         }
         catch (\Exception $e) {
-            $content = (array) $e;
+            $content = $e;
         }
         return $content;
     }

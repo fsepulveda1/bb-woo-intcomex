@@ -31,6 +31,8 @@
                                 <?= __("Consultar", "bwi") ?>
                             </button>
                         </form>
+
+                        <div id="get-order-results"></div>
                     </div>
                 </div>
             </div>

@@ -57,13 +57,27 @@ class OrdersPage {
                 $orderNumber = isset($_POST['order_number']) && is_numeric($_POST['order_number']) ? $_POST['order_number'] : null;
                 $intcomexAPI = IntcomexAPI::getInstance();
                 $intcomexOrder = $intcomexAPI->getOrder($orderNumber);
-                wp_send_json(['data' => (array) $intcomexOrder]);
+
+                if(isset($intcomexOrder->OrderNumber)) {
+                    wp_send_json([
+                        'status' => 'success',
+                        'data' => (array)$intcomexOrder
+                    ]);
+                }
+                else {
+                    wp_send_json_error([
+                        'status' => 'not-found',
+                        'message' => 'Pedido no encontrado'
+                    ]);
+                }
             }
         }
         catch (\Exception $e) {
-
+            wp_send_json_error([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
         }
-        wp_send_json_error(['message' => 'El pedido no existe']);
     }
 
 }

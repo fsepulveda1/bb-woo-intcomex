@@ -17,6 +17,9 @@ use Bigbuda\BbWooIntcomex\Pages\CronSettingsPage;
 use Bigbuda\BbWooIntcomex\Pages\ImportersPage;
 use Bigbuda\BbWooIntcomex\Pages\OrdersPage;
 use Bigbuda\BbWooIntcomex\Pages\SettingsPage;
+use Bigbuda\BbWooIntcomex\Woo\Attributes;
+use Bigbuda\BbWooIntcomex\Woo\OrderMeta;
+use Bigbuda\BbWooIntcomex\Woo\ProductTab;
 use Bigbuda\BbWooIntcomex\Woo\Shopping;
 use Bigbuda\BbWooIntcomex\WP\Taxonomy;
 use GuzzleHttp\Client;
@@ -36,13 +39,21 @@ $bwi_db_version = '1.0';
 add_action( 'plugins_loaded', 'bwi_initiate_plugin' );
 function bwi_initiate_plugin()
 {
+    //Plugin pages
     new SettingsPage();
     new CronSettingsPage();
     new ImportersPage();
     new OrdersPage();
-    new Taxonomy();
+
+    //WordPress hooks
     new CronJobs();
+
+    //Woocommerce hooks
     new Shopping();
+    new ProductTab();
+    new Attributes();
+    new OrderMeta();
+
     add_action('admin_enqueue_scripts', 'bwi_admin_scripts');
 }
 

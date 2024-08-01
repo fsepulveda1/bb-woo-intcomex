@@ -23,7 +23,7 @@ class SyncHelper {
             $category = $data->Category;
             $brand = $data->Brand;
             $productCat = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
-            $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'marcas') : null;
+            $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
 
             $freight = $data->Freight;
             if($freightPackage = $freight->Package ?? null) {
@@ -45,6 +45,7 @@ class SyncHelper {
             $product->set_downloadable(false);
             $product->set_virtual(!$data->Type == 'Physical');
             $product->set_category_ids([$productCat]);
+
             if($brandCat) {
                 wp_set_object_terms($product->get_id(), [(int)$brandCat], 'marcas');
             }
@@ -137,14 +138,19 @@ class SyncHelper {
         $response = new ImporterResponse();
         if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
             $CLPPrice = ceil($intcomexProduct->Price->UnitPrice * $USD2CLP);
-            $CLPFinalPrice = ceil($CLPPrice * ($profitMargin/100));
+            $CLPFee = ceil($CLPPrice * ($profitMargin/100));
+            $CLPFinalPrice = $CLPPrice + $CLPFee;
 
             $product = wc_get_product($existentProduct->ID);
             $product->set_price($CLPFinalPrice);
             $product->set_regular_price($CLPFinalPrice);
-            $product->update_meta_data('_intcomex_price', $existentProduct->Price->UnitPrice ?? null);
+
+            $product->update_meta_data('_intcomex_price_origin', $intcomexProduct->Price->UnitPrice ?? null);
             $product->update_meta_data('_intcomex_price_clp', $CLPPrice);
-            $product->update_meta_data('_intcomex_price_cur', $existentProduct->Price->CurrencyId ?? null);
+            $product->update_meta_data('_intcomex_price_cur', $intcomexProduct->Price->CurrencyId ?? null);
+            $product->update_meta_data('_intcomex_fee_clp', $CLPFee);
+
+
             $product->save();
         }
         else {
