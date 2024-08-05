@@ -11,17 +11,14 @@ class Shopping
     public function __construct()
     {
         $this->intcomexAPI = IntcomexAPI::getInstance();
-        add_action('woocommerce_checkout_order_created', [$this,'orderCreated'] );
         add_action('woocommerce_store_api_checkout_order_processed', [$this,'orderCreated'] );
-        add_action('woocommerce_order_status_cancelled', [$this,'orderCancelled'] );
         add_action('woocommerce_order_status_processing', [$this,'orderProcessing'] );
     }
 
-
-    public function orderCreated(\WC_Order $order): void
+    public function orderProcessing($order_id): void
     {
-
         try {
+            $order = wc_get_order($order_id);
             $orderItems = $this->getOrderItemsArray($order);
             $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
 
@@ -40,23 +37,6 @@ class Shopping
         catch (\Exception $exception) {
             var_dump($exception);
         }
-
-    }
-
-    public function orderCancelled($order_id): void
-    {
-        $order = wc_get_order($order_id);
-        $response = $this->intcomexAPI->cancelOrder(['OrderNumber' => $order->get_meta('bwi_intcomex_order_number')]);
-        var_dump($response);
-        die;
-    }
-
-    public function orderProcessing($order_id): void
-    {
-        $order = wc_get_order($order_id);
-        $response = $this->intcomexAPI->releaseOrder(['OrderNumber' => $order->get_meta('bwi_intcomex_order_number')]);
-        var_dump($response);
-        die;
     }
 
     private function getOrderItemsArray(\WC_Order $order): array
