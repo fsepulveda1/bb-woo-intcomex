@@ -80,21 +80,16 @@ function bwi_admin_scripts() {
 add_action( 'woocommerce_product_query', 'prioritize_products_with_images' );
 
 function prioritize_products_with_images( $query ) {
-    // Asegurarse de que estamos en la consulta principal y no en el administrador
     if ( ! is_admin() && $query->is_main_query() ) {
-
-        // Añadir un join a la tabla de postmeta para verificar si los productos tienen una imagen
         $query->set( 'meta_query', array(
             array(
                 'key'     => '_thumbnail_id',
-                'compare' => 'EXISTS', // Este meta_key existe solo si el producto tiene imagen destacada
+                'compare' => 'EXISTS',
             ),
         ) );
-
-        // Ordenar los productos por la existencia de la imagen primero
         $query->set( 'orderby', array(
-            'meta_value' => 'DESC', // Prioriza los productos con imágenes
-            'date'       => 'DESC'  // Después ordena por la fecha de publicación
+            'meta_value' => 'DESC',
+            'date'       => 'DESC'
         ) );
     }
 }
