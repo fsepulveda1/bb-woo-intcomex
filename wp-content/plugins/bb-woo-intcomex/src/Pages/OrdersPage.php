@@ -39,6 +39,29 @@ class OrdersPage {
             return;
         }
 
+        $tabs = [
+            'get_order' => [
+                'title' => 'Consultar pedidos',
+                'description' => 'Ingresa el número de pedido y presiona el botón \'Consultar\' para obtener un detalle del pedido en Intcomex.'
+            ],
+            'get_order_status' => [
+                'title' => 'Consultar estado de un pedido',
+                'description' => 'Ingresa el número de pedido y presiona el botón \'Consultar\' para obtener el estado del pedido en Intcomex.'
+            ],
+            'generate_tokens' => [
+                'title' => 'Generar token',
+                'description' => 'Ingresa el número de pedido y presiona el botón \'Generar token\' para obtener generar el(los) token(s) de un pedido.'
+            ],
+            'get_token_status' => [
+                'title' => 'Consultar estado de token',
+                'description' => 'Ingresa el número de pedido y presiona el botón \'Consultar token\' para obtener el estado de un token.'
+            ],
+            'get_invoice' => [
+                'title' => 'Consultar recibo',
+                'description' => 'Ingresa el número de pedido y presiona el botón \'Consultar\' para obtener el recibo.'
+            ]
+        ];
+
         include_once BWI_DIR."/templates/page-orders.php";
     }
 
@@ -56,12 +79,20 @@ class OrdersPage {
             if (current_user_can('administrator')) {
                 $orderNumber = isset($_POST['order_number']) && is_numeric($_POST['order_number']) ? $_POST['order_number'] : null;
                 $intcomexAPI = IntcomexAPI::getInstance();
-                $intcomexOrder = $intcomexAPI->getOrder($orderNumber);
+                $type = $_POST['type'] ?? 'get_order';
 
-                if(isset($intcomexOrder->OrderNumber)) {
+                $data = match($type) {
+                    'get_order' => (array)$intcomexAPI->getOrder($orderNumber),
+                    'get_order_status' => (array)$intcomexAPI->getOrderStatus($orderNumber),
+                    'generate_tokens' => (array)$intcomexAPI->generateTokens($orderNumber),
+                    'get_token_status' => (array)$intcomexAPI->getTokenStatus($orderNumber),
+                    'get_invoice' => (array)$intcomexAPI->getInvoice($orderNumber),
+                };
+
+                if(!empty($data)) {
                     wp_send_json([
                         'status' => 'success',
-                        'data' => (array)$intcomexOrder
+                        'data' => $data
                     ]);
                 }
                 else {

@@ -53,7 +53,7 @@ class ImportersPage {
             ],
             [
                 'title' => __('Sincronizar catalogo extendido de productos', 'bwi'),
-                'description' => __('Sincronización de datos de productos desde Intcomex a Woocommerce.','bwi'),
+                'description' => __('Sincronización de datos e imágenes de productos desde Intcomex a Woocommerce.','bwi'),
                 'type' => 'extended_catalog',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
@@ -68,7 +68,7 @@ class ImportersPage {
             ],
             [
                 'title' => __('Sincronizar lista de precios', 'bwi'),
-                'description' => __('Sincronización de datos de productos desde Icecat a Woocommerce.','bwi'),
+                'description' => __('Sincronización de datos de precios de USD a CLP desde intcomex a Woocommerce.','bwi'),
                 'type' => 'product_prices',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
@@ -81,7 +81,7 @@ class ImportersPage {
             ],
             [
                 'title' => __('Sincronizar inventario', 'bwi'),
-                'description' => __('Sincronización de datos de productos desde Icecat a Woocommerce.','bwi'),
+                'description' => __('Sincronización del inventario de productos desde Intcomex a Woocommerce.','bwi'),
                 'type' => 'product_inventory',
                 'process_type' => 'batch',
                 'log_file' => 'product_images_sync.log',
@@ -89,7 +89,7 @@ class ImportersPage {
             ],
             [
                 'title' => __('Sincronizar información de icecat', 'bwi'),
-                'description' => __('Sincronización de datos de productos desde Icecat a Woocommerce.','bwi'),
+                'description' => __('Sincronización de imagenes y título de productos desde Icecat a Woocommerce.','bwi'),
                 'type' => 'icecat_images',
                 'process_type' => 'batch',
                 'log_file' => 'icecat_images_sync.log',

@@ -122,11 +122,11 @@ class ProductTab
 
 
         woocommerce_wp_textarea_input( array(
-            'id'            => '_custom_attributes',
-            'label'         => __('Atributos personalizados','bmi'),
+            'id'            => '_intcomex_attrs',
+            'label'         => __('Atributos de intcomex','bwi'),
             'desc_tip'      => true,
             'class'         => 'woocommerce',
-            'value'         => get_post_meta($product_id, '_custom_attributes', true),
+            'value'         => json_encode(get_post_meta($product_id, '_intcomex_attrs', true)),
         ) );
 
         echo '</div>';
@@ -151,14 +151,14 @@ class ProductTab
             return $post_id;
 
 
-        if(isset($_POST['bmi_min_quantity'])) {
-            update_post_meta($post_id, 'bmi_min_quantity', $_POST['bmi_min_quantity']);
+        if(isset($_POST['bwi_min_quantity'])) {
+            update_post_meta($post_id, 'bwi_min_quantity', $_POST['bwi_min_quantity']);
         }
-        if(isset($_POST['bmi_max_quantity'])) {
-            update_post_meta($post_id, 'bmi_max_quantity', $_POST['bmi_max_quantity']);
+        if(isset($_POST['bwi_max_quantity'])) {
+            update_post_meta($post_id, 'bwi_max_quantity', $_POST['bwi_max_quantity']);
         }
-        if(isset($_POST['bmi_quantity_format'])) {
-            update_post_meta($post_id, 'bmi_quantity_format', $_POST['bmi_quantity_format']);
+        if(isset($_POST['bwi_quantity_format'])) {
+            update_post_meta($post_id, 'bwi_quantity_format', $_POST['bwi_quantity_format']);
         }
 
         // Check if product has variations
@@ -166,9 +166,9 @@ class ProductTab
 
             // Interate over variations
             foreach( $product_variations as $variation ) {
-                update_post_meta($variation['variation_id'],'bmi_min_quantity', $_POST['bmi_min_quantity']);
-                update_post_meta($variation['variation_id'],'bmi_max_quantity', $_POST['bmi_max_quantity']);
-                update_post_meta($variation['variation_id'],'bmi_quantity_format', $_POST['bmi_quantity_format']);
+                update_post_meta($variation['variation_id'],'bwi_min_quantity', $_POST['bwi_min_quantity']);
+                update_post_meta($variation['variation_id'],'bwi_max_quantity', $_POST['bwi_max_quantity']);
+                update_post_meta($variation['variation_id'],'bwi_quantity_format', $_POST['bwi_quantity_format']);
             }
         }
     }

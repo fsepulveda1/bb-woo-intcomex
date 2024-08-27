@@ -1,19 +1,20 @@
 (function ($) {
     $(document).ready(function() {
 
-        //TODO: Reorganize code
+        //ORDERS PAGE
+
         $(".get-order-form").on('submit', function(e) {
             e.preventDefault();
-            $(this).find('button[type="submit"]').attr('disabled',true)
-            const formData = $(this).serialize()+"&ajax_nonce="+bwi_ajax_values.ajax_nonce;
+            let $form = $(this);
+            $form.find('button[type="submit"]').attr('disabled',true)
+            const formData = $form.serialize()+"&ajax_nonce="+bwi_ajax_values.ajax_nonce;
 
             $.ajax({
                 type: "POST",
                 url: bwi_ajax_values.ajax_url,
                 data: formData,
                 success: function (rs) {
-                    console.log(rs);
-                    $(this).find('button[type="submit"]').attr('disabled',false)
+                    $form.find('button[type="submit"]').attr('disabled',false)
                     const { data, status } = rs;
                     let html = "<table class='table table-bordered'>";
                     for (let key in data) {
@@ -26,7 +27,7 @@
                         }
                     }
                     html += '</table>';
-                    $('#get-order-results').html(html);
+                    $form.find('.form-results').html(html);
 
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -37,12 +38,10 @@
                     else {
                         //stats.text("Ha ocurrido un error");
                     }
-                    $(this).find('button[type="submit"]').attr('disabled',false)
+                    $form.find('button[type="submit"]').attr('disabled',false)
                 }
             });
         });
-        //ORDERS PAGE
-
 
         //IMPORTER PAGE
         $(".import-ajax-form").on('submit', function(e) {

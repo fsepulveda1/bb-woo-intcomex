@@ -24,7 +24,6 @@ class SyncHelper {
             $brand = $data->Brand;
             $productCat = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
             $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
-
             $freight = $data->Freight;
             if($freightPackage = $freight->Package ?? null) {
                 $product->set_weight(number_format($freightPackage->Weight * 0.4535, '1', '.'));
@@ -33,7 +32,9 @@ class SyncHelper {
                 $product->set_length($freightPackage->Length ?? null);
             }
 
-            $product->set_name($data->Description);
+            if(!$product->get_meta('bwi_has_icecat_title')) {
+                $product->set_name($data->Description);
+            }
             $product->set_status('publish');
             $product->set_catalog_visibility('visible');
             $product->set_manage_stock(true);
@@ -42,12 +43,19 @@ class SyncHelper {
             }
             $product->set_sold_individually(false);
             $product->set_sku($data->Sku);
-            $product->set_downloadable(false);
+            $product->set_downloadable(!$data->Type == 'Physical');
             $product->set_virtual(!$data->Type == 'Physical');
             $product->set_category_ids([$productCat]);
 
             if($brandCat) {
-                wp_set_object_terms($product->get_id(), [(int)$brandCat], 'marcas');
+                wp_set_object_terms( $product->get_id(), $brandCat, 'pa_marca', true );
+                $attr = array('pa_marca' =>array(
+                    'name'=>'pa_marca',
+                    'value'=>$brandCat,
+                    'is_visible' => '1',
+                    'is_taxonomy' => '1'
+                ));
+                update_post_meta( $product->get_id(), '_product_attributes', $attr);
             }
 
             $freightItem = $freight->Item ?? [];
@@ -68,23 +76,25 @@ class SyncHelper {
     public static function addExtendedProductInfo($data, $forceUpdate = false): ImporterResponse {
         $importerResponse = new ImporterResponse();
         $importerResponse->setData($data);
-
+        $importerResponse->addError(json_encode($data));
         try {
             if ($existentProduct = self::getProductBySKU($data->localSku)) {
                 $importerResponse->setAction('update');
                 $product = wc_get_product($existentProduct->ID);
 
-                $values = [];
-                foreach((array) $data as $key => $item) {
-                    $header = explode('/',$key);
-                    if(count($header) > 1) {
-                        $values[$header[0]][$header[1]] = $item;
+                //if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
+                    $values = [];
+                    foreach((array) $data as $key => $item) {
+                        $header = explode('/',$key);
+                        if(count($header) > 1) {
+                            $values[$header[0]][$header[1]] = $item;
+                        }
                     }
-                }
-
-                if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
                     $product->update_meta_data('_intcomex_attrs', $values);
-                }
+                    $product->set_description('[intcomex_attributes_table]');
+                    $product->set_short_description($data->Descripcion);
+                    $product->save();
+                //}
 
                 if(!empty($data->Imagenes)) {
                     $mainImg = $data->Imagenes[0];

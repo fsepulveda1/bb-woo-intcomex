@@ -95,3 +95,12 @@
     }
   }
 
+  .form-results {
+    &:empty {
+      display: none;
+    }
+    margin-top: 2rem;
+    background-color: white;
+    padding: 1rem;
+
+  }

@@ -38,6 +38,8 @@ class IntcomexAPI {
             $this->utcDate,
             $this->getSignature()
         );
+
+
         $this->client = new Client([
             'base_uri'=> $this->host,
             'headers' => [
@@ -54,6 +56,10 @@ class IntcomexAPI {
 
     public function getProducts() {
         return $this->request('/v1/getproducts');
+    }
+
+    public function getProduct($sku) {
+        return $this->request('/v1/getproduct?sku='.$sku);
     }
 
     public function getCatalog() {
@@ -148,7 +154,7 @@ class IntcomexAPI {
         return $this->post('/v1/updateorder', $params);
     }
 
-    public function getInvoice($orderNumber,$invoiceNumber) {
+    public function getInvoice($orderNumber,$invoiceNumber=null) {
         return $this->request(
             sprintf(
                 '/v1/getinvoice?invoiceNumber=%s&orderNumber=%s',
@@ -180,6 +186,14 @@ class IntcomexAPI {
         return $this->post('/v1/calculateshippingrates', $params);
     }
 
+    public function generateTokens($orderNumber) {
+        return $this->post('/v1/generatetokens',['OrderNumber' => $orderNumber]);
+    }
+
+    public function getTokenStatus($productKey) {
+        return $this->request('/v1/gettokenstatus?productKey='.$productKey);
+    }
+
 
     public function request($uri) {
         try {
@@ -203,7 +217,7 @@ class IntcomexAPI {
             $content = json_decode($content);
         }
         catch (\Exception $e) {
-            $content = (array) $e;
+            throw $e;
         }
         return $content;
     }

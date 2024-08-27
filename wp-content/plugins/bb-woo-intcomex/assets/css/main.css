@@ -78,4 +78,13 @@
   color: #666;
 }
 
+.form-results {
+  margin-top: 2rem;
+  background-color: white;
+  padding: 1rem;
+}
+.form-results:empty {
+  display: none;
+}
+
 /*# sourceMappingURL=main.css.map */

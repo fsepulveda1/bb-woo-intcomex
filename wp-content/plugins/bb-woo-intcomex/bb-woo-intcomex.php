@@ -17,6 +17,7 @@ use Bigbuda\BbWooIntcomex\Pages\CronSettingsPage;
 use Bigbuda\BbWooIntcomex\Pages\ImportersPage;
 use Bigbuda\BbWooIntcomex\Pages\OrdersPage;
 use Bigbuda\BbWooIntcomex\Pages\SettingsPage;
+use Bigbuda\BbWooIntcomex\Shortcodes\ProductDescription;
 use Bigbuda\BbWooIntcomex\Woo\Attributes;
 use Bigbuda\BbWooIntcomex\Woo\OrderMeta;
 use Bigbuda\BbWooIntcomex\Woo\ProductTab;
@@ -54,6 +55,9 @@ function bwi_initiate_plugin()
     new Attributes();
     new OrderMeta();
 
+    //Shortcodes
+    new ProductDescription();
+
     add_action('admin_enqueue_scripts', 'bwi_admin_scripts');
 }
 
@@ -73,30 +77,27 @@ function bwi_admin_scripts() {
     }
 }
 
-function priorizar_productos_con_imagenes($query) {
-    if (!is_admin() && $query->is_main_query() && (is_shop() || is_product_category() || is_product_tag())) {
-        $meta_query = $query->get('meta_query');
+add_action( 'woocommerce_product_query', 'prioritize_products_with_images' );
 
-        if (!is_array($meta_query)) {
-            $meta_query = array();
-        }
+function prioritize_products_with_images( $query ) {
+    // Asegurarse de que estamos en la consulta principal y no en el administrador
+    if ( ! is_admin() && $query->is_main_query() ) {
 
-        $meta_query['meta_thumbnail_id'] = array(
-            'key'     => '_thumbnail_id',
-            'compare' => 'EXISTS',
-            'type' => 'NUMERIC'
-        );
+        // Añadir un join a la tabla de postmeta para verificar si los productos tienen una imagen
+        $query->set( 'meta_query', array(
+            array(
+                'key'     => '_thumbnail_id',
+                'compare' => 'EXISTS', // Este meta_key existe solo si el producto tiene imagen destacada
+            ),
+        ) );
 
-        $query->set('meta_query', $meta_query);
-        $query->set('orderby', array(
-            'meta_thumbnail_id' => 'DESC',
-        ));
-
-        return $query;
+        // Ordenar los productos por la existencia de la imagen primero
+        $query->set( 'orderby', array(
+            'meta_value' => 'DESC', // Prioriza los productos con imágenes
+            'date'       => 'DESC'  // Después ordena por la fecha de publicación
+        ) );
     }
 }
-
-add_action('pre_get_posts', 'priorizar_productos_con_imagenes');
 
 function getUsdValue() {
 
