@@ -28,7 +28,6 @@ class ProductTab
     }
 
     /**
-     * Creates the Stock Locations tab in WC Product.
      *
      * @since 1.0.0
      * @return array

@@ -20,6 +20,7 @@ use Bigbuda\BbWooIntcomex\Pages\SettingsPage;
 use Bigbuda\BbWooIntcomex\Shortcodes\ProductDescription;
 use Bigbuda\BbWooIntcomex\Woo\Attributes;
 use Bigbuda\BbWooIntcomex\Woo\OrderMeta;
+use Bigbuda\BbWooIntcomex\Woo\ProductDownloads;
 use Bigbuda\BbWooIntcomex\Woo\ProductTab;
 use Bigbuda\BbWooIntcomex\Woo\Shopping;
 use Bigbuda\BbWooIntcomex\WP\Taxonomy;
@@ -54,6 +55,7 @@ function bwi_initiate_plugin()
     new ProductTab();
     new Attributes();
     new OrderMeta();
+    new ProductDownloads();
 
     //Shortcodes
     new ProductDescription();
@@ -77,21 +79,22 @@ function bwi_admin_scripts() {
     }
 }
 
-add_action( 'woocommerce_product_query', 'prioritize_products_with_images' );
+add_filter( 'posts_clauses', 'prioritize_products_with_images', 10, 2 );
 
-function prioritize_products_with_images( $query ) {
-    if ( ! is_admin() && $query->is_main_query() ) {
-        $query->set( 'meta_query', array(
-            array(
-                'key'     => '_thumbnail_id',
-                'compare' => 'EXISTS',
-            ),
-        ) );
-        $query->set( 'orderby', array(
-            'meta_value' => 'DESC',
-            'date'       => 'DESC'
-        ) );
+function prioritize_products_with_images( $clauses, $query ) {
+    // Asegurarse de que estamos en la consulta principal y en una consulta de productos WooCommerce
+    if ( ! is_admin() && $query->is_main_query() && ( is_shop() || is_product_category() || is_product_tag() ) ) {
+
+        global $wpdb;
+
+        // Unir la tabla de postmeta para obtener los productos con y sin imágenes
+        $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS pm ON {$wpdb->posts}.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'";
+
+        // Ordenar primero por los que tienen imágenes (no nulos), luego por fecha
+        $clauses['orderby'] = " pm.meta_value DESC, {$wpdb->posts}.post_date DESC";
     }
+
+    return $clauses;
 }
 
 function getUsdValue() {

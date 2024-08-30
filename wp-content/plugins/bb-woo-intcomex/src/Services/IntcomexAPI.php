@@ -39,7 +39,6 @@ class IntcomexAPI {
             $this->getSignature()
         );
 
-
         $this->client = new Client([
             'base_uri'=> $this->host,
             'headers' => [

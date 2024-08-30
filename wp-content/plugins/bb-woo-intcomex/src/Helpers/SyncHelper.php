@@ -37,15 +37,19 @@ class SyncHelper {
             }
             $product->set_status('publish');
             $product->set_catalog_visibility('visible');
-            $product->set_manage_stock(true);
+            $product->set_manage_stock($data->Type == 'Physical');
             if($action == 'create') {
                 $product->set_stock_quantity(0);
             }
             $product->set_sold_individually(false);
             $product->set_sku($data->Sku);
-            $product->set_downloadable(!$data->Type == 'Physical');
-            $product->set_virtual(!$data->Type == 'Physical');
+            $product->set_downloadable($data->Type == 'Physical' ? '0': '1');
+            $product->set_virtual($data->Type == 'Physical' ? '0': '1');
             $product->set_category_ids([$productCat]);
+
+            if($data->Type !== 'Physical') {
+                $importerResponse->addError(json_encode($data));
+            }
 
             if($brandCat) {
                 wp_set_object_terms( $product->get_id(), $brandCat, 'pa_marca', true );
@@ -82,7 +86,7 @@ class SyncHelper {
                 $importerResponse->setAction('update');
                 $product = wc_get_product($existentProduct->ID);
 
-                //if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
+                if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
                     $values = [];
                     foreach((array) $data as $key => $item) {
                         $header = explode('/',$key);
@@ -94,7 +98,7 @@ class SyncHelper {
                     $product->set_description('[intcomex_attributes_table]');
                     $product->set_short_description($data->Descripcion);
                     $product->save();
-                //}
+                }
 
                 if(!empty($data->Imagenes)) {
                     $mainImg = $data->Imagenes[0];
@@ -126,21 +130,27 @@ class SyncHelper {
 
     public static function syncProductInventory($intcomexProduct) {
         $response = new ImporterResponse();
-        if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
-            $stock = $intcomexProduct->InStock;
-            $product = wc_get_product($existentProduct->ID);
-            $product->set_stock_quantity($stock);
-            if($stock > 0) {
-                $product->set_stock_status('outofstock');
-            }
-            else {
-                $product->set_stock_status();
-            }
-            $product->save();
+        if (!$existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
+            $response->addError('No se encontró un producto con sku '.$intcomexProduct->Sku);
+            return $response;
+        }
+
+        $product = wc_get_product($existentProduct->ID);
+
+        if($product->is_virtual()) {
+            $product->set_stock_status();
+            $product->set_manage_stock(false);
         }
         else {
-            $response->addError('No se encontró un producto con sku '.$intcomexProduct->Sku);
+            $stock = $intcomexProduct->InStock;
+            $product->set_stock_quantity($stock);
+            if ($stock > 0) {
+                $product->set_stock_status('outofstock');
+            } else {
+                $product->set_stock_status();
+            }
         }
+        $product->save();
         return $response;
     }
 

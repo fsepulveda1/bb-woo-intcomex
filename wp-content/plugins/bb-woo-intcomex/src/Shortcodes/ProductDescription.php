@@ -10,6 +10,8 @@ class ProductDescription {
 
     public function shortcode() {
         global $product;
+        if(!$product) return '';
+
         $meta_array = $product->get_meta('_intcomex_attrs');
 
         if (!is_array($meta_array) || empty($meta_array)) {
@@ -31,7 +33,12 @@ class ProductDescription {
             foreach($items as $key => $value) {
                 $output .= '<tr>';
                 $output .= '<th>' . esc_html($key) . '</th>';
-                $output .= '<td>' . esc_html($value) . '</td>';
+                if(is_array($value)) {
+                    $output .= '<td>' . implode(',',$value) . '</td>';
+                }
+                else {
+                    $output .= '<td>' . esc_html($value) . '</td>';
+                }
                 $output .= '</tr>';
             }
         }

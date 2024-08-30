@@ -3,6 +3,7 @@
 namespace Bigbuda\BbWooIntcomex\Pages;
 
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * If this file is called directly, abort.
@@ -84,7 +85,20 @@ class OrdersPage {
                 $data = match($type) {
                     'get_order' => (array)$intcomexAPI->getOrder($orderNumber),
                     'get_order_status' => (array)$intcomexAPI->getOrderStatus($orderNumber),
-                    'generate_tokens' => (array)$intcomexAPI->generateTokens($orderNumber),
+                    'generate_tokens' => (function () use($orderNumber, $intcomexAPI){
+
+                        $tokens = $intcomexAPI->generateTokens($orderNumber);
+
+                        if($tokens) {
+                            $order = wc_get_order($orderNumber);
+                            if(! $order->meta_exists('bwi_intcomex_tokens')) {
+                                $order->add_meta_data('bwi_intcomex_tokens', $tokens, true);
+                                $order->save();
+                            }
+                        }
+
+                        return (array)$tokens;
+                    })(),
                     'get_token_status' => (array)$intcomexAPI->getTokenStatus($orderNumber),
                     'get_invoice' => (array)$intcomexAPI->getInvoice($orderNumber),
                 };
@@ -102,6 +116,12 @@ class OrdersPage {
                     ]);
                 }
             }
+        }
+        catch (RequestException $e) {
+            wp_send_json_error([
+                'status' => 'request_error',
+                'message' => $e->getResponse()->getBody()->getContents()
+            ]);
         }
         catch (\Exception $e) {
             wp_send_json_error([

@@ -18,9 +18,13 @@ class Shopping
 
     // Validating stock when item cart is added
     public function add_manager_stock_validation( $passed, $product_id, $quantity ) {
-
         if($passed) {
             $product = wc_get_product($product_id);
+
+            if($product->is_virtual()) {
+                return $passed;
+            }
+
             $intcomexAPI = IntcomexAPI::getInstance();
             $intcomexProduct = $intcomexAPI->getProduct($product->get_sku());
             $passed = $quantity <= $intcomexProduct->InStock;
@@ -41,20 +45,32 @@ class Shopping
             $orderItems = $this->getOrderItemsArray($order);
             $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
 
-            if(!isset($intcomexOrder->OrderNumber)) {
-                try {
-                    $response = $this->intcomexAPI->placeOrder($orderItems, $order->get_id());
-                    $order->update_meta_data('bwi_intcomex_order_number', $response->OrderNumber);
-                }
-                catch (\Exception $exception) {
-                    $order->add_order_note('Intocomex error: '.$exception->getMessage());
-                }
+            if(isset($intcomexOrder->OrderNumber)) {
+                $orderNumber = $intcomexOrder->OrderNumber;
+            }
+            else {
+                $response = $this->intcomexAPI->placeOrder($orderItems, $order->get_id());
+                $orderNumber = $response->OrderNumber;
+            }
+
+            if(!$order->get_meta('bwi_intcomex_order_number')) {
+                $order->add_meta_data('bwi_intcomex_order_number', $orderNumber);
+            }
+
+            if($this->order_has_virtual_items($order)) {
+                $intcomexAPI = IntcomexAPI::getInstance();
+                $tokens = $intcomexAPI->generateTokens($orderNumber);
+                $order->add_meta_data('bwi_intcomex_tokens', $tokens, true);
             }
 
         }
         catch (\Exception $exception) {
+            $order->add_order_note('Intocomex error: '.$exception->getMessage());
             $order->update_meta_data('bwi_intcomex_order_error', $exception->getMessage());
         }
+
+        $order->save();
+
     }
 
     private function getOrderItemsArray(\WC_Order $order): array
@@ -70,5 +86,18 @@ class Shopping
             ];
         }
         return $itemsArray;
+    }
+
+
+
+    private function order_has_virtual_items(\WC_Order $order): bool
+    {
+        foreach ($order->get_items() as $order_item){
+            $item = new \WC_Product($order_item->get_product_id());
+            if ($item->is_virtual()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
