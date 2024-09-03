@@ -19,18 +19,22 @@ class SyncProductsInventory implements CronJobInterface {
 
     public function run()
     {
+        $logfile = self::getCronActionName();
         $intcomexAPI = IntcomexAPI::getInstance();
         $productInventory = $intcomexAPI->getInventory();
 
-        //TODO write log with init information
+        plugin_log('Iniciando sincronización de inventario',$logfile,'w');
 
         foreach($productInventory as $intcomexProduct) {
             $importerResponse = SyncHelper::syncProductInventory($intcomexProduct);
             if($importerResponse->isError()) {
-                //TODO Write in log
+                plugin_log([
+                    'error' => $importerResponse->getErrors(),
+                    'intcomexProduct' => $intcomexProduct->Sku
+                ], $logfile);
             }
         }
 
-        //TODO write log with finish information
+        plugin_log('Sincronización de inventario finalizada',$logfile);
     }
 }

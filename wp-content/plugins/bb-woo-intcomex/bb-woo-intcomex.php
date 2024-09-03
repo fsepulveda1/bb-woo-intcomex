@@ -80,7 +80,6 @@ function bwi_admin_scripts() {
 }
 
 add_filter( 'posts_clauses', 'prioritize_products_with_images', 10, 2 );
-
 function prioritize_products_with_images( $clauses, $query ) {
     // Asegurarse de que estamos en la consulta principal y en una consulta de productos WooCommerce
     if ( ! is_admin() && $query->is_main_query() && ( is_shop() || is_product_category() || is_product_tag() ) ) {
@@ -121,4 +120,34 @@ function getUsdValue() {
     }
 
     return (float) str_replace(['.',','],['','.'],get_option('USD2CLP', 0));
+}
+
+/**
+ * Write an entry to a log file in the uploads directory.
+ *
+ * @since x.x.x
+ *
+ * @param mixed $entry String or array of the information to write to the log.
+ * @param string $file Optional. The file basename for the .log file.
+ * @param string $mode Optional. The type of write. See 'mode' at https://www.php.net/manual/en/function.fopen.php.
+ * @return boolean|int Number of bytes written to the lof file, false otherwise.
+ */
+if ( ! function_exists( 'plugin_log' ) ) {
+    function plugin_log( $entry, $file = 'plugin',$mode = 'a' ): false|int
+    {
+        $upload_dir = wp_upload_dir();
+        $upload_dir = $upload_dir['basedir'];
+        $log_dir    = $upload_dir . '/bwi-logs/';
+        if ( is_array( $entry ) ) {
+            $entry = json_encode( $entry );
+        }
+        if(!file_exists($log_dir)) {
+            mkdir($log_dir);
+        }
+        $file  = $log_dir . $file . '.log';
+        $file  = fopen( $file, $mode );
+        $bytes = fwrite( $file, current_time( 'mysql' ) . "::" . $entry . "\n" );
+        fclose( $file );
+        return $bytes;
+    }
 }

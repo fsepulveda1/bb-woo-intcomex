@@ -5,6 +5,7 @@ use WC_Product_Simple;
 use WP_Term_Query;
 
 class SyncHelper {
+
     public static function addProductBase($data): ImporterResponse
     {
         $importerResponse = new ImporterResponse();
@@ -47,10 +48,6 @@ class SyncHelper {
             $product->set_virtual($data->Type == 'Physical' ? '0': '1');
             $product->set_category_ids([$productCat]);
 
-            if($data->Type !== 'Physical') {
-                $importerResponse->addError(json_encode($data));
-            }
-
             if($brandCat) {
                 wp_set_object_terms( $product->get_id(), $brandCat, 'pa_marca', true );
                 $attr = array('pa_marca' =>array(
@@ -80,7 +77,7 @@ class SyncHelper {
     public static function addExtendedProductInfo($data, $forceUpdate = false): ImporterResponse {
         $importerResponse = new ImporterResponse();
         $importerResponse->setData($data);
-        $importerResponse->addError(json_encode($data));
+
         try {
             if ($existentProduct = self::getProductBySKU($data->localSku)) {
                 $importerResponse->setAction('update');
@@ -178,6 +175,7 @@ class SyncHelper {
         }
         return $response;
     }
+
     public static function getTermByExternalId($taxonomy,$intcomexId) {
         $term_query = new WP_Term_Query(array(
             'taxonomy' => $taxonomy,
@@ -306,6 +304,10 @@ class SyncHelper {
         $file['name'] = $filename;
         $file['tmp_name'] = download_url($url);
         $file_id = null;
+
+        if( $file['tmp_name'] instanceof \WP_Error) {
+            return null;
+        }
 
         if($update_exists && ($file_id = self::mediaFileAlreadyExists($file['name']))) {
             wp_delete_post($file_id);

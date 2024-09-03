@@ -8,6 +8,7 @@ use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
 
 class SyncProductsPrice implements CronJobInterface {
 
+
     public static function getNiceName(): string
     {
         return "Sincronización de precios";
@@ -19,11 +20,12 @@ class SyncProductsPrice implements CronJobInterface {
 
     public function run()
     {
+        $logfile = self::getCronActionName();
         $intcomexAPI = IntcomexAPI::getInstance();
         $productPriceList = $intcomexAPI->getPriceList();
         $options = get_option('bwi_options');
 
-        //TODO write log with init information
+        plugin_log('Iniciando sincronización de precios',$logfile,'w');
 
         $USD2CLP = getUsdValue();
         $profitMargin = $options['field_profit_margin'];
@@ -31,10 +33,13 @@ class SyncProductsPrice implements CronJobInterface {
         foreach($productPriceList as $intcomexProduct) {
             $importerResponse = SyncHelper::syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin);
             if($importerResponse->isError()) {
-                //TODO Write in log
+                plugin_log([
+                    'error' => $importerResponse->getErrors(),
+                    'intcomexProduct' => $intcomexProduct->Sku
+                ], $logfile);
             }
         }
 
-        //TODO write log with finish information
+        plugin_log('Sincronización de precios finalizada',$logfile);
     }
 }
