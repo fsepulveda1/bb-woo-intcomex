@@ -49,6 +49,24 @@ class IntcomexAPI {
         //die($token);
     }
 
+    public function renewToken() {
+        $this->utcDate = gmdate('Y-m-d\TH:i:s\Z');
+
+        $token = sprintf('Bearer apiKey=%s&utcTimeStamp=%s&signature=%s',
+            $this->apiKey,
+            $this->utcDate,
+            $this->getSignature()
+        );
+
+        $this->client = new Client([
+            'base_uri'=> $this->host,
+            'headers' => [
+                'Authorization' => $token,
+                'Content-Type' => 'application/json',
+            ]
+        ]);
+    }
+
     private function getSignature() {
         return hash('sha256',$this->apiKey.",".$this->apiSecret.",".$this->utcDate);
     }

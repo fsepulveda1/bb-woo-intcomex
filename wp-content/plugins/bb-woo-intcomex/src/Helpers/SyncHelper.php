@@ -23,8 +23,8 @@ class SyncHelper {
 
             $category = $data->Category;
             $brand = $data->Brand;
-            $productCat = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
-            $brandCat = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
+            $productCatID = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
+            $brandCatID = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
             $freight = $data->Freight;
             if($freightPackage = $freight->Package ?? null) {
                 $product->set_weight(number_format($freightPackage->Weight * 0.4535, '1', '.'));
@@ -46,25 +46,22 @@ class SyncHelper {
             $product->set_sku($data->Sku);
             $product->set_downloadable($data->Type == 'Physical' ? '0': '1');
             $product->set_virtual($data->Type == 'Physical' ? '0': '1');
-            $product->set_category_ids([$productCat]);
-
-            if($brandCat) {
-                wp_set_object_terms( $product->get_id(), $brandCat, 'pa_marca', true );
-                $attr = array('pa_marca' =>array(
-                    'name'=>'pa_marca',
-                    'value'=>$brandCat,
-                    'is_visible' => '1',
-                    'is_taxonomy' => '1'
-                ));
-                update_post_meta( $product->get_id(), '_product_attributes', $attr);
-            }
-
+            $product->set_category_ids([$productCatID]);
             $freightItem = $freight->Item ?? [];
             $product->update_meta_data('_freight_item', json_encode($freightItem));
             $product->update_meta_data('_mpn', $data->Mpn);
-
             $product->save();
 
+            if($brandCatID) {
+                wp_set_object_terms($product->get_id(), $brandCatID, 'pa_marca', true);
+                $attr = array('pa_marca' => array(
+                    'name' => 'pa_marca',
+                    'value' => $brandCatID,
+                    'is_visible' => '1',
+                    'is_taxonomy' => '1'
+                ));
+                update_post_meta($product->get_id(), '_product_attributes', $attr);
+            }
         }
         catch (\Exception $exception) {
             $importerResponse->addError($exception->getMessage().
