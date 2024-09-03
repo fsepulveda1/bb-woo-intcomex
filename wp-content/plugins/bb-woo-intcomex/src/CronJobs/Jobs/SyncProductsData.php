@@ -21,8 +21,8 @@ class SyncProductsData implements CronJobInterface {
 
     public function run()
     {
-        @ini_set('memory_limit','128MB');
-        @ini_set('max_execution_time','-1');
+        @ini_set('max_execution_time',-1);
+        @ini_set('memory_limit',-1);
 
         $logfile = self::getCronActionName();
         $sync_base = true;
@@ -43,7 +43,7 @@ class SyncProductsData implements CronJobInterface {
 
         $intcomexAPI = IntcomexAPI::getInstance();
         if($sync_base) {
-            plugin_log('Iniciando sincronización de productos base',$logfile);
+            plugin_log('Iniciando sincronización del catalogo',$logfile);
             $allProducts = $intcomexAPI->getCatalog();
             foreach ($allProducts as $intcomexProduct) {
                 $importerResponse = SyncHelper::addProductBase($intcomexProduct);
@@ -58,7 +58,7 @@ class SyncProductsData implements CronJobInterface {
         }
 
         if($sync_extend) {
-            plugin_log('Iniciando sincronización de productos extendido', $logfile);
+            plugin_log('Iniciando sincronización del catalogo extendido', $logfile);
 
             $allProductsData = $intcomexAPI->getExtendedCatalog();
             if(is_array($allProductsData)) {
