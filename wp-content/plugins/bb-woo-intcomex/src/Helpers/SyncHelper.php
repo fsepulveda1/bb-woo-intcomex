@@ -10,7 +10,6 @@ class SyncHelper {
     {
         $importerResponse = new ImporterResponse();
         $importerResponse->setData($data);
-
         try {
             if ($existentProduct = self::getProductBySKU($data->Sku)) {
                 $action = 'update';
@@ -23,7 +22,7 @@ class SyncHelper {
 
             $category = $data->Category;
             $brand = $data->Brand;
-            $productCatID = $category ? self::createCategory($category->CategoryId, $category->Description) : null;
+            $productCatID = $category ? self::createCategoryTree($category) : null;
             $brandCatID = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
             $freight = $data->Freight;
             if($freightPackage = $freight->Package ?? null) {
@@ -173,10 +172,11 @@ class SyncHelper {
         return $response;
     }
 
-    public static function getTermByExternalId($taxonomy,$intcomexId) {
+    public static function getTermByExternalId($taxonomy,$intcomexId, $parent) {
         $term_query = new WP_Term_Query(array(
             'taxonomy' => $taxonomy,
             'hide_empty' => false,
+            'parent' => $parent,
             'meta_query' => array(
                 array(
                     'key' => '_intcomex_id',
@@ -211,16 +211,28 @@ class SyncHelper {
         return false;
     }
 
+    public static function createCategoryTree($category, $parent = 0) {
+        $catID = self::createCategory($category->CategoryId, $category->Description,'product_cat', $parent);
+        if(count($category->Subcategories)) {
+            foreach ($category->Subcategories as $item) {
+                $catID = self::createCategory($item->CategoryId, $item->Description,'product_cat', $catID);
+            }
+        }
+        return $catID;
+    }
 
-    public static function createCategory($id,$description, $taxonomy = 'product_cat')
+    public static function createCategory($id,$description, $taxonomy = 'product_cat', $parent = 0)
     {
-        $productCat = self::getTermByExternalId($taxonomy, $id);
+        $productCat = self::getTermByExternalId($taxonomy, $id, $parent);
         if (!$productCat) {
-            if($term = get_term_by('name',$description,$taxonomy)) {
-                return $term->term_id;
+            if($terms = get_terms([ 'name' => $description, 'taxonomy' => $taxonomy, 'parent' => $parent,'hide_empty' => false])) {
+                if($terms instanceof \WP_Error) {
+                    throw new \Exception($terms->get_error_message());
+                }
+                return $terms[0]->term_id;
             }
 
-            $newCat = wp_insert_term($description, $taxonomy);
+            $newCat = wp_insert_term($description, $taxonomy, ['parent' => $parent]);
             if (is_array($newCat)) {
                 add_term_meta($newCat['term_id'], '_intcomex_id', $id);
                 $productCat = get_term($newCat['term_id']);

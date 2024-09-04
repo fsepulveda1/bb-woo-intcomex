@@ -98,11 +98,11 @@ function prioritize_products_with_images( $clauses, $query ) {
 
 function getUsdValue() {
 
-    $date = get_option('USD2CLP_date', date('Y-m-d'));
+    $date = get_option('USD2CLP_date');
     if($date !== date('Y-m-d')) {
         $client = new Client([
             'timeout' => 1,
-            'connect_timeout' => 1
+            'connect_timeout' => 3
         ]);
         try {
             $response = $client->get('https://api.sbif.cl/api-sbifv3/recursos_api/dolar?apikey=55f9b3ad028facf7dce500d439c00cbbcf1234a7&formato=json');
@@ -115,7 +115,7 @@ function getUsdValue() {
             }
         }
         catch (Exception $exception){
-            //TODO send error to log
+            plugin_log('Error USD2CLP: '.$exception->getMessage());
         }
     }
 
