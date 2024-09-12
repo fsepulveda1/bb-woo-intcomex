@@ -43,31 +43,33 @@ class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
                 $brand = $product->get_attribute('pa_marca');
                 $mpn = $product->get_meta('_mpn');
                 if($brand && $mpn) {
-                    $xml = $this->iceCatAPI->getArticleByMPN($brand, $mpn);
-                    if($this->iceCatAPI->isValidProduct($xml)) {
-                        $data = $this->iceCatAPI->xml2array($xml);
-                        $this->iceCatAPI->getProductData($data);
-                        $newTitle = $this->iceCatAPI->getProductName();
-                        $productDataAttrs = $this->iceCatAPI->getProductDataAttributes();
-                        $productDataDesc = $this->iceCatAPI->getProductDescriptions();
-                        $productImages = $this->iceCatAPI->getProductImages();
+                    try {
+                        $rs = $this->iceCatAPI->getProductByMpn($brand, $mpn);
+                        if(!empty($rs->data->GeneralInfo) && $info = $rs->data->GeneralInfo) {
+                            $data['name'] = $info->ProductName;
+                            $data['description'] = $info->Description->LongDesc;
+                            $data['summary_short'] = $info->SummaryDescription->ShortSummaryDescription;
+                            $data['summary_long'] = $info->SummaryDescription->LongSummaryDescription;
+                            $data['bullet_points'] = $info->BulletPoints->Values;
+                            $data['image'] = $rs->data->Image->HighPic;
+                            $data['gallery'] = $rs->data->Gallery;
+                            $data['multimedia'] = $rs->data->Multimedia;
+                            $data['features'] = $rs->data->FeaturesGroups;
 
-                        $product->set_name($newTitle);
-                        $product->update_meta_data('bwi_has_icecat_title',true);
-
-                        if(count($product->get_gallery_image_ids()) >= 1) {
-                            $errors[] = 'Se mantienen imágenes de intcomex para el producto '.$product->get_permalink();
-                            continue;
+                            SyncHelper::syncProductIceCat($product,$data);
+                            $errors[] = json_encode($data);
                         }
-
-                        if(is_array($productImages) and isset($productImages['HighPic'])) {
-                            SyncHelper::setProductImages($productImages['HighPic'],$product,true);
-                        }
-
-                        $product->save();
                     }
-                    else {
-                        $errors[] = $xml->Product->attributes()->ErrorMessage. " (".$brand.",".$mpn.")";
+                    catch (\Exception $exception) {
+                        if($exception->getCode() == 404) {
+                            $errors[] = 'Producto no encontrado (SKU: '.$product->get_sku().")";
+                        }
+                        elseif($exception->getCode() == 403) {
+                            $errors[] = 'No tienes acceso a este producto (SKU: '.$product->get_sku().")";
+                        }
+                        else {
+                            $errors[] = $exception->getMessage();
+                        }
                     }
                 }
                 else {

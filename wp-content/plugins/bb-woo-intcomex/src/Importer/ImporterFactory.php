@@ -9,6 +9,7 @@ use Bigbuda\BbWooIntcomex\Importer\Importers\InventoryImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\PricesImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\ProductImporter;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
+use Bigbuda\BbWooIntcomex\Services\IceCatJsonAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
 use http\Exception;
 use ReflectionClass;
@@ -25,7 +26,7 @@ class ImporterFactory {
 
     public ImporterInterface $importer;
     public IntcomexAPI $intcomexAPI;
-    public IceCatAPI $iceCatAPI;
+    public IceCatJsonAPI $iceCatAPI;
 
     public array $options;
 
@@ -34,7 +35,7 @@ class ImporterFactory {
      */
     public function __construct($type) {
         $this->intcomexAPI = IntcomexAPI::getInstance();
-        $this->iceCatAPI = new IceCatAPI();
+        $this->iceCatAPI = new IceCatJsonAPI();
         $this->options = get_option('bwi_options');
         $importerClass = self::getImporters()[$type];
         if($importerClass) {

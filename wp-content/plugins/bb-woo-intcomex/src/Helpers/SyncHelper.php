@@ -88,8 +88,12 @@ class SyncHelper {
                         }
                     }
                     $product->update_meta_data('_intcomex_attrs', $values);
-                    $product->set_description('[intcomex_attributes_table]');
-                    $product->set_short_description($data->Descripcion);
+
+                    if(!$product->get_meta('bwi_has_icecat_description')) {
+                        $product->set_description('[intcomex_attributes_table]');
+                        $product->set_short_description($data->Descripcion);
+                    }
+
                     $product->save();
                 }
 
@@ -97,15 +101,19 @@ class SyncHelper {
                     $mainImg = $data->Imagenes[0];
                     unset($data->Imagenes[0]);
 
-                    if(!$product->get_image_id() || $forceUpdate) {
-                        self::removeProductImages($product);
-                        self::setProductImages(urldecode($mainImg->url), $product);
+                    if(!$product->get_meta('bwi_has_icecat_image')) {
+                        if(!$product->get_image_id() || $forceUpdate) {
+                            self::removeProductImages($product);
+                            self::setProductImages(urldecode($mainImg->url), $product);
+                        }
                     }
 
-                    if(!count($product->get_gallery_image_ids()) || $forceUpdate) {
-                        self::removeProductImages($product,'gallery');
-                        foreach($data->Imagenes as $img) {
-                            self::setProductImages(urldecode($img->url), $product, false);
+                    if(!$product->get_meta('bwi_has_icecat_gallery')) {
+                        if (!count($product->get_gallery_image_ids()) || $forceUpdate) {
+                            self::removeProductImages($product, 'gallery');
+                            foreach ($data->Imagenes as $img) {
+                                self::setProductImages(urldecode($img->url), $product, false);
+                            }
                         }
                     }
                 }
@@ -119,6 +127,42 @@ class SyncHelper {
         }
 
         return $importerResponse;
+    }
+
+    public static function syncProductIceCat(\WC_Product $product, $data) {
+        if(!empty($data['name'])) {
+            $product->set_name($data['name']);
+            $product->update_meta_data('bwi_has_icecat_title',true);
+        }
+        if(!empty($data['description'])) {
+            $description = sprintf('<p>%s</p>',$data['description']);
+            if(!empty($data['bullet_points'])) {
+                $description .="<ul class='bullet_points'>";
+                foreach ($data['bullet_points'] as $bullet_point) {
+                    $description .= sprintf('<li>%s</li>', $bullet_point);
+                }
+                $description .= "</ul>";
+            }
+            $product->set_description($description);
+            $product->update_meta_data('bwi_has_icecat_description',true);
+
+        }
+        if(!empty($data['summary_long'])) {
+            $product->set_short_description($data['summary_long']);
+        }
+
+        if(!empty($data['image'])) {
+            self::setProductImages($data['image'],$product);
+            $product->update_meta_data('bwi_has_icecat_image',true);
+        }
+        if(!empty($data['gallery'])) {
+            foreach($data['gallery'] as $image) {
+                self::setProductImages($image->Pic, $product, false);
+            }
+            $product->update_meta_data('bwi_has_icecat_gallery',true);
+        }
+
+        $product->save();
     }
 
     public static function syncProductInventory($intcomexProduct) {

@@ -13,6 +13,7 @@ class Shopping
     {
         $this->intcomexAPI = IntcomexAPI::getInstance();
         add_action('woocommerce_order_status_processing', [$this,'orderProcessing'] );
+        add_action('woocommerce_order_status_completed', [$this,'orderProcessing'] );
         add_filter( 'woocommerce_add_to_cart_validation', [$this,'add_manager_stock_validation'], 10, 3 );
     }
 
