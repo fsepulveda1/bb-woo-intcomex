@@ -90,7 +90,6 @@ class SyncHelper {
                     $product->update_meta_data('_intcomex_attrs', $values);
 
                     if(!$product->get_meta('bwi_has_icecat_description')) {
-                        $product->set_description('[intcomex_attributes_table]');
                         $product->set_short_description($data->Descripcion);
                     }
 
@@ -160,6 +159,23 @@ class SyncHelper {
                 self::setProductImages($image->Pic, $product, false);
             }
             $product->update_meta_data('bwi_has_icecat_gallery',true);
+        }
+
+        if(!empty($data['features'])) {
+            $featuresArray = [];
+            foreach($data['features'] as $featureGroup) {
+                $group = $featureGroup->FeatureGroup->Name->Value;
+                $features = $featureGroup->Features;
+                foreach ($features as $feature) {
+                    $header = $feature->Feature->Name->Value;
+                    $value = $feature->LocalValue;
+                    $featuresArray[$group][$header] = $value;
+                }
+            }
+
+            if(!empty($featuresArray)) {
+                $product->update_meta_data('bwi_icecat_features', $featuresArray);
+            }
         }
 
         $product->save();
