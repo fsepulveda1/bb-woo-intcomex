@@ -12,7 +12,7 @@ class ProductDescription {
         global $product;
         if(!$product) return '';
 
-        $meta_array = $product->get_meta('_intcomex_attrs');
+        $meta_array = $product->get_meta('bwi_icecat_features') ?? $product->get_meta('bwi_intcomex_attrs');
 
         if (!is_array($meta_array) || empty($meta_array)) {
             return '';

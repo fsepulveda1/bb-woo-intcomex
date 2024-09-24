@@ -121,11 +121,27 @@ class ProductTab
 
 
         woocommerce_wp_textarea_input( array(
-            'id'            => '_intcomex_attrs',
+            'id'            => 'bwi_intcomex_attrs',
             'label'         => __('Atributos de intcomex','bwi'),
             'desc_tip'      => true,
             'class'         => 'woocommerce',
-            'value'         => json_encode(get_post_meta($product_id, '_intcomex_attrs', true)),
+            'value'         => json_encode(get_post_meta($product_id, 'bwi_intcomex_attrs', true)),
+        ) );
+
+        woocommerce_wp_textarea_input( array(
+            'id'            => 'bwi_icecat_features',
+            'label'         => __('Atributos de icecat','bwi'),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'value'         => json_encode(get_post_meta($product_id, 'bwi_icecat_features', true)),
+        ) );
+
+        woocommerce_wp_textarea_input( array(
+            'id'            => 'bwi_icecat_multimedia',
+            'label'         => __('Multimedia de icecat','bwi'),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'value'         => json_encode(get_post_meta($product_id, 'bwi_icecat_multimedia', true)),
         ) );
 
         echo '</div>';

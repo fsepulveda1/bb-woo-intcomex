@@ -39,9 +39,9 @@ class IceCatJsonAPI {
     public function getProductByMpn($brand, $code) {
         return $this->request(sprintf(
             '?UserName=%s&Brand=%s&ProductCode=%s&Language=es',
-            $this->user,
-            $brand,
-            $code
+            urlencode($this->user),
+            urlencode($brand),
+            urlencode($code)
         ));
     }
 

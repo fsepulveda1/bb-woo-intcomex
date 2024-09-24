@@ -79,7 +79,7 @@ class SyncHelper {
                 $importerResponse->setAction('update');
                 $product = wc_get_product($existentProduct->ID);
 
-                if(!$product->meta_exists('_intcomex_attrs') || $forceUpdate) {
+                if(!$product->meta_exists('bwi_intcomex_attrs') || $forceUpdate) {
                     $values = [];
                     foreach((array) $data as $key => $item) {
                         $header = explode('/',$key);
@@ -87,7 +87,7 @@ class SyncHelper {
                             $values[$header[0]][$header[1]] = $item;
                         }
                     }
-                    $product->update_meta_data('_intcomex_attrs', $values);
+                    $product->update_meta_data('bwi_intcomex_attrs', $values);
 
                     if(!$product->get_meta('bwi_has_icecat_description')) {
                         $product->set_short_description($data->Descripcion);
@@ -151,14 +151,20 @@ class SyncHelper {
         }
 
         if(!empty($data['image'])) {
-            self::setProductImages($data['image'],$product);
-            $product->update_meta_data('bwi_has_icecat_image',true);
+            if(!$product->get_meta('bwi_has_icecat_image')) {
+                self::removeProductImages($product);
+                self::setProductImages($data['image'],$product);
+                $product->update_meta_data('bwi_has_icecat_image',true);
+            }
         }
         if(!empty($data['gallery'])) {
-            foreach($data['gallery'] as $image) {
-                self::setProductImages($image->Pic, $product, false);
+            if(!$product->get_meta('bwi_has_icecat_gallery')) {
+                self::removeProductImages($product, 'gallery');
+                foreach($data['gallery'] as $image) {
+                    self::setProductImages($image->Pic, $product, false);
+                }
+                $product->update_meta_data('bwi_has_icecat_gallery',true);
             }
-            $product->update_meta_data('bwi_has_icecat_gallery',true);
         }
 
         if(!empty($data['features'])) {
@@ -177,6 +183,8 @@ class SyncHelper {
                 $product->update_meta_data('bwi_icecat_features', $featuresArray);
             }
         }
+        $product->update_meta_data('bwi_icecat_multimedia', $data['multimedia']);
+
 
         $product->save();
     }
