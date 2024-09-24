@@ -37,12 +37,23 @@ class IceCatJsonAPI {
     }
 
     public function getProductByMpn($brand, $code) {
+        $brand = $this->normalizeBrand($brand);
         return $this->request(sprintf(
             '?UserName=%s&Brand=%s&ProductCode=%s&Language=es',
             urlencode($this->user),
             urlencode($brand),
             urlencode($code)
         ));
+    }
+
+    public function normalizeBrand($brand) {
+        if(str_contains($brand,'Nexxt')) {
+            $brand = 'Nexxt Solutions';
+        }
+        if(str_contains($brand,'Kingston')) {
+            $brand = 'Kingston';
+        }
+        return $brand;
     }
 
     public function getDataArray($rs): array
