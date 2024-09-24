@@ -36,6 +36,7 @@ class ProductImporter extends BaseImporter implements ImporterInterface  {
         foreach ($intcomexProductsChunks as $intcomexProduct) {
             $processed++;
             $importerResponse = SyncHelper::addProductBase($intcomexProduct);
+            $errors[] = json_encode($intcomexProduct);
 
             if($importerResponse->isError()) {
                 $errors = array_merge($errors, $importerResponse->getErrors());

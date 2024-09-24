@@ -53,10 +53,10 @@ class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
                     }
                     catch (\Exception $exception) {
                         if($exception->getCode() == 404) {
-                            $errors[] = 'Producto no encontrado (SKU: '.$product->get_sku().")";
+                            $errors[] = 'Producto no encontrado (SKU: '.$product->get_sku().", Marca: ".$brand.")";
                         }
                         elseif($exception->getCode() == 403) {
-                            $errors[] = 'No tienes acceso a este producto (SKU: '.$product->get_sku().")";
+                            $errors[] = 'No tienes acceso a este producto (SKU: '.$product->get_sku().", Marca: ".$brand.")";
                         }
                         else {
                             $errors[] = $exception->getMessage();

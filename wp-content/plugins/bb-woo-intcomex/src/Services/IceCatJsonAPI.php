@@ -49,7 +49,7 @@ class IceCatJsonAPI {
     {
         $data = [];
         if (!empty($rs->data->GeneralInfo) && $info = $rs->data->GeneralInfo) {
-            $data['name'] = $info->TitleInfo->GeneratedLocalTitle ?? "";
+            $data['name'] = $info->TitleInfo->GeneratedLocalTitle->Value ?? "";
             $data['description'] = $info->Description->LongDesc ?? "";
             $data['summary_short'] = $info->SummaryDescription->ShortSummaryDescription ?? "";
             $data['summary_long'] = $info->SummaryDescription->LongSummaryDescription ?? "";
