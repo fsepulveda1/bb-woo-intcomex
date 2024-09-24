@@ -5,6 +5,7 @@ namespace Bigbuda\BbWooIntcomex\CronJobs\Jobs;
 use Bigbuda\BbWooIntcomex\CronJobs\CronJobInterface;
 use Bigbuda\BbWooIntcomex\Helpers\SyncHelper;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
+use Bigbuda\BbWooIntcomex\Services\IceCatJsonAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
 use GuzzleHttp\Exception\ClientException;
 use WP_Query;
@@ -92,7 +93,7 @@ class SyncProductsData implements CronJobInterface {
             if ($sync_icecat) {
                 plugin_log('Iniciando sincronización de datos desde icecat', $logfile);
 
-                $iceCatAPI = new IceCatAPI();
+                $iceCatAPI = new IceCatJsonAPI();
                 $query = new WP_Query([
                     'post_type' => 'product',
                     'post_status' => 'publish',
@@ -108,34 +109,9 @@ class SyncProductsData implements CronJobInterface {
                         $brand = $product->get_attribute('pa_marca');
                         $mpn = $product->get_meta('_mpn');
                         if ($brand && $mpn) {
-                            $xml = $iceCatAPI->getArticleByMPN($brand, $mpn);
-
-                            if (is_bool($xml)) {
-                                continue;
-                            }
-                            if ($iceCatAPI->isValidProduct($xml)) {
-                                $data = $iceCatAPI->xml2array($xml);
-                                $iceCatAPI->getProductData($data);
-                                $newTitle = $iceCatAPI->getProductName();
-                                $productImages = $iceCatAPI->getProductImages();
-
-                                $product->set_name($newTitle);
-                                $product->update_meta_data('bwi_has_icecat_title', true);
-
-                                if (count($product->get_gallery_image_ids()) >= 1) {
-                                    continue;
-                                }
-
-                                if (is_array($productImages) and isset($productImages['HighPic'])) {
-                                    SyncHelper::setProductImages($productImages['HighPic'], $product, true);
-                                }
-
-                                $product->save();
-                            } else {
-                                plugin_log([
-                                    'error' => $xml->Product->attributes()->ErrorMessage . " (" . $brand . "," . $mpn . ")",
-                                    'product' => $product->get_id()
-                                ], $logfile);
+                            $rs = $iceCatAPI->getProductByMpn($brand, $mpn);
+                            if($data = $iceCatAPI->getDataArray($rs)) {
+                                SyncHelper::syncProductIceCat($product, $data);
                             }
                         } else {
                             plugin_log([
