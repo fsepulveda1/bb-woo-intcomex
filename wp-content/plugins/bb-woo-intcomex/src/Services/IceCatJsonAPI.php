@@ -45,6 +45,22 @@ class IceCatJsonAPI {
         ));
     }
 
+    public function getDataArray($rs): array
+    {
+        $data = [];
+        if (!empty($rs->data->GeneralInfo) && $info = $rs->data->GeneralInfo) {
+            $data['name'] = $info->TitleInfo->GeneratedLocalTitle ?? "";
+            $data['description'] = $info->Description->LongDesc ?? "";
+            $data['summary_short'] = $info->SummaryDescription->ShortSummaryDescription ?? "";
+            $data['summary_long'] = $info->SummaryDescription->LongSummaryDescription ?? "";
+            $data['bullet_points'] = $info->BulletPoints->Values ?? "";
+            $data['image'] = $rs->data->Image->HighPic ?? "";
+            $data['gallery'] = $rs->data->Gallery ?? [];
+            $data['multimedia'] = $rs->data->Multimedia ?? [];
+            $data['features'] = $rs->data->FeaturesGroups ?? [];
+        }
+        return $data;
+    }
 
 
     public function request($uri) {

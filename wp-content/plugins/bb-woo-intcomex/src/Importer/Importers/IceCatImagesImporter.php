@@ -45,21 +45,10 @@ class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
                 if($brand && $mpn) {
                     try {
                         $rs = $this->iceCatAPI->getProductByMpn($brand, $mpn);
-                        if(!empty($rs->data->GeneralInfo) && $info = $rs->data->GeneralInfo) {
-                            $data['name'] = $info->TitleInfo->GeneratedLocalTitle ?? "";
-                            $data['description'] = $info->Description->LongDesc ?? "";
-                            $data['summary_short'] = $info->SummaryDescription->ShortSummaryDescription ?? "";
-                            $data['summary_long'] = $info->SummaryDescription->LongSummaryDescription ?? "";
-                            $data['bullet_points'] = $info->BulletPoints->Values ?? "";
-                            $data['image'] = $rs->data->Image->HighPic ?? "";
-                            $data['gallery'] = $rs->data->Gallery ?? [];
-                            $data['multimedia'] = $rs->data->Multimedia ?? [];
-                            $data['features'] = $rs->data->FeaturesGroups ?? [];
-
+                        if($data = $this->iceCatAPI->getDataArray($rs)) {
                             SyncHelper::syncProductIceCat($product,$data);
                             $errors[] = 'Producto Actualizado ('.$product->get_sku().")";
                             $errors[] = $product->get_permalink();
-
                         }
                     }
                     catch (\Exception $exception) {
