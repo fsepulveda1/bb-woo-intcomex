@@ -30,6 +30,7 @@ class SyncProductsData implements CronJobInterface {
         $sync_base = true;
         $sync_extend = true;
         $sync_icecat = true;
+        $removeNotIntcomexProducts = true;
 
         try {
             if (!function_exists('media_handle_upload')) {
@@ -89,6 +90,25 @@ class SyncProductsData implements CronJobInterface {
                 }
             }
 
+            if($removeNotIntcomexProducts) {
+                $intcomexAPI = IntcomexAPI::getInstance();
+                $query = new WP_Query([
+                    'post_type' => 'product',
+                    'post_status' => 'publish',
+                    'posts_per_page' => -1,
+                ]);
+
+                if ($query->have_posts()) {
+                    while ($query->have_posts()) {
+                        $query->the_post();
+                        $product_id = get_the_ID();
+                        $product = wc_get_product($product_id);
+                        if(!$intcomexAPI->getProduct($product->get_sku())) {
+                            wp_trash_post($product_id);
+                        }
+                    }
+                }
+            }
 
             if ($sync_icecat) {
                 plugin_log('Iniciando sincronización de datos desde icecat', $logfile);
