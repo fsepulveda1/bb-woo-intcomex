@@ -213,20 +213,11 @@ class IntcomexAPI {
 
 
     public function request($uri) {
-        try {
-            $response = $this->client->get($uri);
-            $content = $response->getBody()->getContents();
-            $content = json_decode($content);
-        }
-        catch (\Exception $e) {
-            $content = $e;
-        }
-        return $content;
+        $response = $this->client->get($uri);
+        $content = $response->getBody()->getContents();
+        return json_decode($content);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function post($uri, $params) {
 
         $response = $this->client->post($uri,[
