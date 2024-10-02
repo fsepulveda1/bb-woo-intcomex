@@ -3,6 +3,7 @@
 namespace Bigbuda\BbWooIntcomex\Pages;
 
 use Bigbuda\BbWooIntcomex\Importer\ImporterFactory;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * If this file is called directly, abort.
@@ -130,8 +131,7 @@ class ImportersPage {
         }
         catch (\Exception $e) {
             $response['result'] = 'FAIL';
-
-            $response['message'] = method_exists($e,'getBody') ? $e->getBody() : $e->getMessage();
+            $response['message'] = method_exists($e,'getResponse') ? $e->getResponse()->getBody() : $e->getMessage();
         }
         wp_send_json($response);
     }
