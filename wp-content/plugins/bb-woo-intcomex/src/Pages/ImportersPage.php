@@ -130,7 +130,8 @@ class ImportersPage {
         }
         catch (\Exception $e) {
             $response['result'] = 'FAIL';
-            $response['message'] = $e->getMessage();
+
+            $response['message'] = method_exists($e,'getBody') ? $e->getBody() : $e->getMessage();
         }
         wp_send_json($response);
     }
