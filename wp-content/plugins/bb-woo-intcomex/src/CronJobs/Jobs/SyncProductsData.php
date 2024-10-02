@@ -58,6 +58,7 @@ class SyncProductsData implements CronJobInterface {
                         ], $logfile);
                     }
                 }
+
                 unset($allProducts);
             }
 
@@ -85,7 +86,7 @@ class SyncProductsData implements CronJobInterface {
                         ], $logfile);
                     }
                     plugin_log([
-                        'error' => $allProductsData,
+                        'error' => json_encode($allProductsData),
                     ], $logfile);
                 }
             }
