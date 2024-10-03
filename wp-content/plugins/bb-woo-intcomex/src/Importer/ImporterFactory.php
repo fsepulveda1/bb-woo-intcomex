@@ -67,6 +67,7 @@ class ImporterFactory {
     public function importBatch($form_data): array
     {
         @ini_set('max_execution_time',600);
+        @ini_set('memory_limit',-1);
         $page = $form_data['page'];
         $rowsPerPage = $this->importer->getRowsPerPage();
 

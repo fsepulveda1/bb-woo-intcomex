@@ -129,7 +129,7 @@ class ImportersPage {
 
             }
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
             $response['result'] = 'FAIL';
             $response['message'] = method_exists($e,'getResponse') ? $e->getResponse()->getBody()->getContents() : $e->getMessage();
         }
