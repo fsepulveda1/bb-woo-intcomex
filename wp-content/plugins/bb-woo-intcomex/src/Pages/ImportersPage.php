@@ -41,8 +41,6 @@ class ImportersPage {
         }
 
         $options = get_option('bwi_options');
-
-        /** TODO get importers from importer factory */
         $importers = [
             [
                 'title' => __('Sincronizar catalogo de productos', 'bwi'),
@@ -94,6 +92,14 @@ class ImportersPage {
                 'type' => 'icecat_images',
                 'process_type' => 'batch',
                 'log_file' => 'icecat_images_sync.log',
+                'fields' => []
+            ],
+            [
+                'title' => __('Regenerar miniaturas de imágenes', 'bwi'),
+                'description' => __('Vuelve a generar las miniaturas de los productos en woocommerce.','bwi'),
+                'type' => 'regenerate_thumbnails',
+                'process_type' => 'batch',
+                'log_file' => 'regenerate_thumbnails.log',
                 'fields' => []
             ],
         ];

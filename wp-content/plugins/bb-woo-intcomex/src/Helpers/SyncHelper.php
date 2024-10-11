@@ -151,11 +151,11 @@ class SyncHelper {
         }
 
         if(!empty($data['image'])) {
-            if(!$product->get_meta('bwi_has_icecat_image')) {
+            //if(!$product->get_meta('bwi_has_icecat_image')) {
                 self::removeProductImages($product);
                 self::setProductImages($data['image'],$product);
                 $product->update_meta_data('bwi_has_icecat_image',true);
-            }
+            //}
         }
         if(!empty($data['gallery'])) {
             if(!$product->get_meta('bwi_has_icecat_gallery')) {
