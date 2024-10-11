@@ -79,18 +79,13 @@ function bwi_admin_scripts() {
     }
 }
 
-add_filter( 'posts_clauses', 'prioritize_products_with_images', 10, 2 );
-function prioritize_products_with_images( $clauses, $query ) {
-    // Asegurarse de que estamos en la consulta principal y en una consulta de productos WooCommerce
+add_filter( 'posts_clauses', 'prioritize_products_with_stock_and_images', 10, 2 );
+function prioritize_products_with_stock_and_images( $clauses, $query ) {
     if ( ! is_admin() && $query->is_main_query() && ( is_shop() || is_product_category() || is_product_tag() ) ) {
-
         global $wpdb;
-
-        // Unir la tabla de postmeta para obtener los productos con y sin imágenes
         $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS pm ON {$wpdb->posts}.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'";
-
-        // Ordenar primero por los que tienen imágenes (no nulos), luego por fecha
-        $clauses['orderby'] = " pm.meta_value DESC, {$wpdb->posts}.post_date DESC";
+        $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS stock_status ON {$wpdb->posts}.ID = stock_status.post_id AND stock_status.meta_key = '_stock_status'";
+        $clauses['orderby'] = " stock_status.meta_value = 'instock' DESC, pm.meta_value DESC, {$wpdb->posts}.post_date DESC";
     }
 
     return $clauses;

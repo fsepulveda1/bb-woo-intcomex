@@ -46,7 +46,7 @@ class IceCatImagesImporter extends BaseImporter implements ImporterInterface  {
                     try {
                         $rs = $this->iceCatAPI->getProductByMpn($brand, $mpn);
                         if($data = $this->iceCatAPI->getDataArray($rs)) {
-                            SyncHelper::syncProductIceCat($product,$data);
+                            SyncHelper::syncProductIceCat($product,$data, $options['force_update']);
                             $errors[] = 'Producto Actualizado ('.$product->get_sku().")";
                             $errors[] = $product->get_permalink();
                         }

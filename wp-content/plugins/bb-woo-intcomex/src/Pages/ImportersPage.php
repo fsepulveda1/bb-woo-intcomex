@@ -92,7 +92,14 @@ class ImportersPage {
                 'type' => 'icecat_images',
                 'process_type' => 'batch',
                 'log_file' => 'icecat_images_sync.log',
-                'fields' => []
+                'fields' => [
+                    [
+                        'type' => 'checkbox',
+                        'name' => 'force_update',
+                        'label' => 'Forzar actualización',
+                        'description' => 'Si se marca esta opción, se eliminarán imágenes y atributos de los productos existentes para reemplazarlos por nuevos valores.'
+                    ]
+                ]
             ],
             [
                 'title' => __('Regenerar miniaturas de imágenes', 'bwi'),

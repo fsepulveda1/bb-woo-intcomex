@@ -128,7 +128,7 @@ class SyncHelper {
         return $importerResponse;
     }
 
-    public static function syncProductIceCat(\WC_Product $product, $data) {
+    public static function syncProductIceCat(\WC_Product $product, $data, $forceUpdate = true) {
         if(!empty($data['name'])) {
             $product->set_name($data['name']);
             $product->update_meta_data('bwi_has_icecat_title',true);
@@ -150,15 +150,15 @@ class SyncHelper {
             $product->set_short_description($data['summary_long']);
         }
 
-        if(!empty($data['image'])) {
-            //if(!$product->get_meta('bwi_has_icecat_image')) {
+        if(!empty(trim($data['image']))) {
+            if(!$product->get_meta('bwi_has_icecat_image') || $forceUpdate) {
                 self::removeProductImages($product);
                 self::setProductImages($data['image'],$product);
                 $product->update_meta_data('bwi_has_icecat_image',true);
-            //}
+            }
         }
         if(!empty($data['gallery'])) {
-            if(!$product->get_meta('bwi_has_icecat_gallery')) {
+            if(!$product->get_meta('bwi_has_icecat_gallery') || $forceUpdate) {
                 self::removeProductImages($product, 'gallery');
                 foreach($data['gallery'] as $image) {
                     self::setProductImages($image->Pic, $product, false);
