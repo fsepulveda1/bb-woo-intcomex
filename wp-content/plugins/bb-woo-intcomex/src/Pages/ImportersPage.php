@@ -109,6 +109,21 @@ class ImportersPage {
                 'log_file' => 'regenerate_thumbnails.log',
                 'fields' => []
             ],
+            [
+                'title' => __('Test Product', 'bwi'),
+                'description' => __('Obtiene la salida JSON de un producto a partir del SKU.','bwi'),
+                'type' => 'test_product',
+                'process_type' => 'batch',
+                'log_file' => 'test_product.log',
+                'fields' => [
+                    [
+                        'type' => 'input',
+                        'input_type' => 'text',
+                        'name' => 'product_sku',
+                        'label' => 'SKU',
+                    ]
+                ]
+            ],
         ];
 
         include_once BWI_DIR."/templates/page-sync.php";

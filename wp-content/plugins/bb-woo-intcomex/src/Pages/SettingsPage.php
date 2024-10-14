@@ -132,6 +132,24 @@ class SettingsPage {
             ]
         );
 
+        add_settings_section(
+            'bwi_section_intcomex_general',
+            __('Configuración adicional', 'bwi'),
+            [$this, 'bwi_section_cb'],
+            'bwi-settings'
+        );
+
+        add_settings_field(
+            'field_activate_cart_validation',
+            __('Activar validación al añadir al carro', 'bwi'),
+            [$this, 'field_checkbox'],
+            'bwi-settings',
+            'bwi_section_icecat',
+            [
+                'label_for' => 'field_activate_cart_validation',
+                'class' => 'row',
+            ]
+        );
     }
 
 

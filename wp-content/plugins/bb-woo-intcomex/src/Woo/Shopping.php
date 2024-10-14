@@ -14,11 +14,17 @@ class Shopping
         $this->intcomexAPI = IntcomexAPI::getInstance();
         add_action('woocommerce_order_status_processing', [$this,'orderProcessing'] );
         add_action('woocommerce_order_status_completed', [$this,'orderProcessing'] );
-        add_filter( 'woocommerce_add_to_cart_validation', [$this,'add_manager_stock_validation'], 10, 3 );
+        add_filter( 'woocommerce_add_to_cart_validation', [$this,'add_stock_validation'], 10, 3 );
     }
 
     // Validating stock when item cart is added
-    public function add_manager_stock_validation( $passed, $product_id, $quantity ) {
+    public function add_stock_validation( $passed, $product_id, $quantity ) {
+        $options = get_option('bwi_options');
+
+        if(!$options['field_activate_cart_validation']) {
+            return $passed;
+        }
+
         if($passed) {
             $product = wc_get_product($product_id);
 
@@ -29,12 +35,14 @@ class Shopping
             $intcomexAPI = IntcomexAPI::getInstance();
             $intcomexProduct = $intcomexAPI->getProduct($product->get_sku());
             $passed = $quantity <= $intcomexProduct->InStock;
+
             if(!$passed) {
                 $product->set_stock_quantity($intcomexProduct->InStock);
                 $product->set_stock_status('outofstock');
                 $product->save();
                 wc_add_notice('No hay stock suficiente.', 'error');
             }
+
         }
         return $passed;
     }

@@ -9,6 +9,7 @@ use Bigbuda\BbWooIntcomex\Importer\Importers\InventoryImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\PricesImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\ProductImporter;
 use Bigbuda\BbWooIntcomex\Importer\Importers\RegenerateThumbnailsImporter;
+use Bigbuda\BbWooIntcomex\Importer\Importers\TestProductImporter;
 use Bigbuda\BbWooIntcomex\Services\IceCatAPI;
 use Bigbuda\BbWooIntcomex\Services\IceCatJsonAPI;
 use Bigbuda\BbWooIntcomex\Services\IntcomexAPI;
@@ -58,7 +59,8 @@ class ImporterFactory {
             'product_inventory' => InventoryImporter::class,
             'product_prices' => PricesImporter::class,
             'extended_catalog' => ExtendedCatalogImporter::class,
-            'regenerate_thumbnails' => RegenerateThumbnailsImporter::class
+            'regenerate_thumbnails' => RegenerateThumbnailsImporter::class,
+            'test_product' => TestProductImporter::class
         ];
     }
 
