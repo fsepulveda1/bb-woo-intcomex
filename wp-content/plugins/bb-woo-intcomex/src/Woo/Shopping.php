@@ -32,9 +32,14 @@ class Shopping
                 return $passed;
             }
 
-            $intcomexAPI = IntcomexAPI::getInstance();
-            $intcomexProduct = $intcomexAPI->getProduct($product->get_sku());
-            $passed = $quantity <= $intcomexProduct->InStock;
+            try {
+                $intcomexAPI = IntcomexAPI::getInstance();
+                $intcomexProduct = $intcomexAPI->getProduct($product->get_sku());
+                $passed = $quantity <= $intcomexProduct->InStock;
+            }
+            catch (\Exception $exception) {
+                //TODO write log
+            }
 
             if(!$passed) {
                 $product->set_stock_quantity($intcomexProduct->InStock);
@@ -50,9 +55,16 @@ class Shopping
     public function orderProcessing($order_id): void
     {
         $order = wc_get_order($order_id);
+        $intcomexOrder = null;
+
         try {
             $orderItems = $this->getOrderItemsArray($order);
-            $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
+            try {
+                $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
+            }
+            catch (\Throwable $exception) {
+              //TODO Write log if error !== 404
+            }
 
             if(isset($intcomexOrder->OrderNumber)) {
                 $orderNumber = $intcomexOrder->OrderNumber;
@@ -89,7 +101,7 @@ class Shopping
             $data = $item->get_data();
             $product = new \WC_Product($data['product_id']);
             $itemsArray[] = [
-                'Sku' => $product->get_sku(),
+                'Sku' => $product->get_meta('bwi_intcomex_sku'),
                 'Quantity' => $item->get_quantity(),
                 'StoreItemId' => $product->get_id()
             ];

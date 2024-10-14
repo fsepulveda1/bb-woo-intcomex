@@ -76,7 +76,7 @@ class IntcomexAPI {
     }
 
     public function getProduct($sku) {
-        return $this->request('/v1/getproduct?sku='.$sku);
+        return $this->request('/v1/getproduct?mpn='.$sku);
     }
 
     public function getCatalog() {

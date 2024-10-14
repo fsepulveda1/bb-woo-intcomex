@@ -42,13 +42,14 @@ class SyncHelper {
                 $product->set_stock_quantity(0);
             }
             $product->set_sold_individually(false);
-            $product->set_sku($data->Sku);
+            $product->set_sku($data->Mpn);
             $product->set_downloadable($data->Type == 'Physical' ? '0': '1');
             $product->set_virtual($data->Type == 'Physical' ? '0': '1');
             $product->set_category_ids([$productCatID]);
             $freightItem = $freight->Item ?? [];
             $product->update_meta_data('_freight_item', json_encode($freightItem));
             $product->update_meta_data('_mpn', $data->Mpn);
+            $product->update_meta_data('bwi_intcomex_sku', $data->Sku);
             $product->save();
 
             if($brandCatID) {
@@ -263,7 +264,7 @@ class SyncHelper {
             'post_type' => 'product',
             'posts_per_page' => 1,
             'meta_query' => array(
-                array('key' => '_sku', //meta key name here
+                array('key' => 'bwi_intcomex_sku',
                     'value' => $id,
                     'compare' => '=',
                 )
