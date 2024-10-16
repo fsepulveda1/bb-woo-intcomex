@@ -207,9 +207,9 @@ class SyncHelper {
             $stock = $intcomexProduct->InStock;
             $product->set_stock_quantity($stock);
             if ($stock > 0) {
-                $product->set_stock_status('outofstock');
-            } else {
                 $product->set_stock_status();
+            } else {
+                $product->set_stock_status('outofstock');
             }
         }
         $product->save();
