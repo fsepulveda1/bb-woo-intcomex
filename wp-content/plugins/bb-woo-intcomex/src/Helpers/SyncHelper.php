@@ -411,6 +411,7 @@ class SyncHelper {
                 @unlink($file['tmp_name']);
             } else {
                 $file_id = $attachmentId;
+                wp_update_attachment_metadata($file_id, wp_generate_attachment_metadata($file_id, get_attached_file($file_id)));
             }
 
         }
