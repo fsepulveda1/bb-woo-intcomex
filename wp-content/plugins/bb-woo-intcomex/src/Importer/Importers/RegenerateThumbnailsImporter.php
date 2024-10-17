@@ -16,6 +16,12 @@ class RegenerateThumbnailsImporter extends BaseImporter implements ImporterInter
             'post_type'      => 'product',
             'post_status'    => 'publish',
             'posts_per_page' => -1,
+            'meta_query'     => [
+                [
+                    'key'     => '_thumbnail_id',
+                    'compare' => 'EXISTS',
+                ],
+            ],
         );
 
         $query = new WP_Query( $args );
@@ -31,7 +37,13 @@ class RegenerateThumbnailsImporter extends BaseImporter implements ImporterInter
             'post_type'      => 'product',
             'post_status'    => 'publish',
             'posts_per_page' => $this->rowsPerPage,
-            'offset' => ($page-1)*$this->rowsPerPage
+            'offset' => ($page-1)*$this->rowsPerPage,
+            'meta_query'     => [
+                [
+                    'key'     => '_thumbnail_id',
+                    'compare' => 'EXISTS', // Solo obtener productos que tengan una imagen destacada
+                ],
+            ],
         );
         $query = new WP_Query( $args );
 
