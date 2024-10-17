@@ -99,7 +99,7 @@ class ProductTab
             'description'   => __( 'Moneda del producto desde intcomex.', 'bwi' ),
             'desc_tip'      => true,
             'class'         => 'woocommerce',
-            'type'          => 'number',
+            'type'          => 'text',
             'value'         => get_post_meta($product_id, '_intcomex_price_cur', true),
             'custom_attributes' => [
                 'readonly' => 'readonly'
