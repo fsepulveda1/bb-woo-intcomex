@@ -225,7 +225,7 @@ class SyncHelper {
         if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
             $intcomexCurrency = $intcomexProduct->Price->CurrencyId ?? null;
             $intcomexPrice = $intcomexProduct->Price->UnitPrice;
-            if($intcomexCurrency == 'US') {
+            if(strtolower($intcomexCurrency) == 'us') {
                 $CLPPrice = ceil($intcomexPrice * $USD2CLP);
             }
             else {
