@@ -24,8 +24,12 @@ class SyncHelper {
             $brand = $data->Brand;
             $productCatID = $category ? self::createCategoryTree($category) : null;
             $brandCatID = $brand ? self::createCategory($brand->BrandId,$brand->Description,'pa_marca') : null;
-            $freight = $data->Freight;
-            if($freightPackage = $freight->Package ?? null) {
+
+            if($data->Freight) {
+                $freight = $data->Freight;
+            }
+
+            if(isset($freight) && ($freightPackage = $freight->Package ?? null)) {
                 $product->set_weight(number_format($freightPackage->Weight * 0.4535, '1', '.'));
                 $product->set_height(number_format($freightPackage->Height * 2.54, '1', '.'));
                 $product->set_width(number_format($freightPackage->Width * 2.54, '1', '.'));
@@ -219,17 +223,24 @@ class SyncHelper {
     public static function syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin) {
         $response = new ImporterResponse();
         if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
-            $CLPPrice = ceil($intcomexProduct->Price->UnitPrice * $USD2CLP);
-            $CLPFee = ceil($CLPPrice * ($profitMargin/100));
-            $CLPFinalPrice = $CLPPrice + $CLPFee;
+            $intcomexCurrency = $intcomexProduct->Price->CurrencyId ?? null;
+            $intcomexPrice = $intcomexProduct->Price->UnitPrice;
+            if($intcomexCurrency == 'US') {
+                $CLPPrice = ceil($intcomexPrice * $USD2CLP);
+            }
+            else {
+                $CLPPrice = $intcomexPrice;
+            }
 
+            $CLPFee = ceil($CLPPrice * ($profitMargin / 100));
+            $CLPFinalPrice = $CLPPrice + $CLPFee;
             $product = wc_get_product($existentProduct->ID);
             $product->set_price($CLPFinalPrice);
             $product->set_regular_price($CLPFinalPrice);
 
-            $product->update_meta_data('_intcomex_price_origin', $intcomexProduct->Price->UnitPrice ?? null);
+            $product->update_meta_data('_intcomex_price_origin', $intcomexPrice ?? null);
             $product->update_meta_data('_intcomex_price_clp', $CLPPrice);
-            $product->update_meta_data('_intcomex_price_cur', $intcomexProduct->Price->CurrencyId ?? null);
+            $product->update_meta_data('_intcomex_price_cur', $intcomexCurrency ?? null);
             $product->update_meta_data('_intcomex_fee_clp', $CLPFee);
 
 

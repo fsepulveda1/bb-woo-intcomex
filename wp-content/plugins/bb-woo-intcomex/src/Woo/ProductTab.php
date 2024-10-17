@@ -94,6 +94,19 @@ class ProductTab
         ) );
 
         woocommerce_wp_text_input( array(
+            'id'            => '_intcomex_price_origin',
+            'label'         => 'Moneda en Intcomex',
+            'description'   => __( 'Moneda del producto desde intcomex.', 'bwi' ),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'type'          => 'number',
+            'value'         => get_post_meta($product_id, '_intcomex_price_cur', true),
+            'custom_attributes' => [
+                'readonly' => 'readonly'
+            ]
+        ) );
+
+        woocommerce_wp_text_input( array(
             'id'            => '_intcomex_price_clp',
             'label'         => 'Precio en Intcomex en pesos',
             'description'   => __( 'Precio del producto desde intcomex.', 'bwi' ),
