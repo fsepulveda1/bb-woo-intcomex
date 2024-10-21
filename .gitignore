@@ -5,6 +5,7 @@
 !/wp-content/plugins/bb-woo-intcomex/
 /wp-content/plugins/bb-woo-intcomex/vendor/
 /wp-content/themes/*
+!/wp-content/theme/woodmart/
 !/wp-content/theme/woodmart-child/
 /wp-content/uploads
 /wp-content/upgrade
