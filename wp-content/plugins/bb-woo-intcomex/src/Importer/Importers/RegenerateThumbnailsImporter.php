@@ -52,7 +52,17 @@ class RegenerateThumbnailsImporter extends BaseImporter implements ImporterInter
                 $query->the_post();
                 $product_id = get_the_ID();
                 try {
-                    $this->regenerateThumbnail($product_id);
+                    $thumbnail_id = get_post_thumbnail_id($product_id);
+                    $this->regenerateThumbnail($product_id,$thumbnail_id);
+                    $meta = wp_get_attachment_metadata($thumbnail_id);
+                    if ($meta && isset($meta['sizes'])) {
+                        $uploads_dir = wp_upload_dir();
+                        foreach ($meta['sizes'] as $size => $details) {
+                            $image_url = $uploads_dir['baseurl'] . '/' . dirname($meta['file']) . '/' . $details['file'];
+                            $errors[] = 'Tamaño: ' . $size . ' - URL: ' . $image_url . '<br>';
+                        }
+                    }
+
                 }
                 catch (\Exception $exception) {
                     $errors[] = $exception->getMessage();
@@ -65,12 +75,11 @@ class RegenerateThumbnailsImporter extends BaseImporter implements ImporterInter
         return [$processed, $errors];
     }
 
-    private function regenerateThumbnail($product_id) {
-        $thumbnail_id = get_post_thumbnail_id($product_id);
-        if ($thumbnail_id) {
+    private function regenerateThumbnail($product_id, $image_id) {
+        if ($image_id) {
             if (function_exists('wp_update_attachment_metadata')) {
-                $metadata = wp_generate_attachment_metadata($thumbnail_id, get_attached_file($thumbnail_id));
-                wp_update_attachment_metadata($thumbnail_id, $metadata);
+                $metadata = wp_generate_attachment_metadata($image_id, get_attached_file($image_id));
+                wp_update_attachment_metadata($image_id, $metadata);
             }
         }
     }

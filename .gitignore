@@ -29,3 +29,9 @@
 /wp-comments-post.php
 /wp-login.php
 *~
+.htaccess
+error_log
+dev
+php.ini
+user.ini
+.well-known
