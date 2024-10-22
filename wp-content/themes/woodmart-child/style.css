@@ -66,6 +66,11 @@ html body .title-wrapper.wd-title-color-primary .title {
 html body .category-grid-item .hover-mask {
     text-align: center;
 }
+html body .category-grid-item .hover-mask h3{
+    font-size: 1.25rem ;
+    line-height: 1.5rem;
+    word-break:break-word;
+}
 html body .category-grid-item .wd-entities-title {
     width: 100%;
     transform: translateX(0);
@@ -693,6 +698,10 @@ html body .single-product-page .product-tabs-wrapper {
     }
 }
 @media (max-width: 480px) {
+    html body .category-grid-item .hover-mask h3 {
+        font-size: .875rem;
+        line-height: 1.125rem;
+    }
     html body .footer-container .formcraft-css .fc-form .form-element .form-element-html input[type=email], html body .footer-container .formcraft-css .fc-form .form-element .form-element-html input[type=text] {
         border-radius: 8px 8px 0 0!important;
     }
