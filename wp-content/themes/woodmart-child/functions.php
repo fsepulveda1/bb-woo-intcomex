@@ -223,7 +223,7 @@ function apply_discount_for_bank_transfer($cart) {
     if (isset(WC()->session->chosen_payment_method) && WC()->session->chosen_payment_method === 'bacs') {
         $options = get_option( 'bwi_options' );
         $discount = ceil($cart->get_subtotal() * ($options['field_payment_method_margin'] / 100));
-        $cart->add_fee(__('Descuento por Transferencia Bancaria', 'text-domain'), -$discount);
+        $cart->add_fee(__('Descuento por Transferencia Bancaria ('.$options['field_payment_method_margin'].'%)', 'text-domain'), -$discount);
     }
 }
 
