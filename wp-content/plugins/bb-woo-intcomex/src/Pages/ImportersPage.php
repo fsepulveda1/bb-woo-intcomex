@@ -101,15 +101,15 @@ class ImportersPage {
                     ]
                 ]
             ],
-            [
+            /*[
                 'title' => __('Regenerar miniaturas de imágenes', 'bwi'),
                 'description' => __('Vuelve a generar las miniaturas de los productos en woocommerce.','bwi'),
                 'type' => 'regenerate_thumbnails',
                 'process_type' => 'batch',
                 'log_file' => 'regenerate_thumbnails.log',
                 'fields' => []
-            ],
-            [
+            ],*/
+            /*[
                 'title' => __('Test Product', 'bwi'),
                 'description' => __('Obtiene la salida JSON de un producto a partir del SKU.','bwi'),
                 'type' => 'test_product',
@@ -123,7 +123,7 @@ class ImportersPage {
                         'label' => 'SKU',
                     ]
                 ]
-            ],
+            ],*/
         ];
 
         include_once BWI_DIR."/templates/page-sync.php";
