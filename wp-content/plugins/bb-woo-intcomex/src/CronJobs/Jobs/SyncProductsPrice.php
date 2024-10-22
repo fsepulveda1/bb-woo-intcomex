@@ -29,9 +29,10 @@ class SyncProductsPrice implements CronJobInterface {
 
         $USD2CLP = getUsdValue();
         $profitMargin = $options['field_profit_margin'];
+        $paymentMethodMargin = $options['field_payment_method_margin'];
 
         foreach($productPriceList as $intcomexProduct) {
-            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin);
+            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin,$paymentMethodMargin);
             if($importerResponse->isError()) {
                 plugin_log([
                     'error' => $importerResponse->getErrors(),
