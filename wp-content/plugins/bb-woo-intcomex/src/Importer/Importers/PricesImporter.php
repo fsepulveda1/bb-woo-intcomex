@@ -26,9 +26,10 @@ class PricesImporter extends BaseImporter implements ImporterInterface  {
         $processed = 0;
         $USD2CLP = getUsdValue();
         $profitMargin = $this->options['field_profit_margin'];
+        $paymentMethodMargin = $this->options['field_payment_method_margin'];
         foreach ($intcomexProductsChunks[$page-1] as $intcomexProduct) {
             $processed++;
-            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct,$USD2CLP,$profitMargin);
+            $importerResponse = SyncHelper::syncProductPrice($intcomexProduct,$USD2CLP,$profitMargin,$paymentMethodMargin);
 
             if($importerResponse->isError()) {
                 $errors = array_merge($errors, $importerResponse->getErrors());

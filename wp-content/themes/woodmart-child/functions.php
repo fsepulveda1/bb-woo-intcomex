@@ -188,7 +188,7 @@ function modificar_texto_stock( $availability_text, $product ) {
 add_filter( 'woocommerce_get_availability_text', 'modificar_texto_stock', 10, 2 );
 
 // Añadir un recargo por pagar con Webpay Plus
-function custom_payment_gateway_surcharge( $cart ) {
+/*function custom_payment_gateway_surcharge( $cart ) {
     // Asegurarse de que estamos en el checkout
     if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
         return;
@@ -213,6 +213,19 @@ function custom_payment_gateway_surcharge( $cart ) {
     }
 }
 add_action( 'woocommerce_cart_calculate_fees', 'custom_payment_gateway_surcharge' );
+*/
+
+add_action('woocommerce_cart_calculate_fees', 'apply_discount_for_bank_transfer');
+function apply_discount_for_bank_transfer($cart) {
+    if (is_admin() && !defined('DOING_AJAX')) return;
+
+    // Verifica si el método de pago seleccionado es transferencia bancaria
+    if (isset(WC()->session->chosen_payment_method) && WC()->session->chosen_payment_method === 'bacs') {
+        $options = get_option( 'bwi_options' );
+        $discount = ceil($cart->get_subtotal() * ($options['_intcomex_payment_fee_clp'] / 100));
+        $cart->add_fee(__('Descuento por Transferencia Bancaria', 'text-domain'), -$discount);
+    }
+}
 
 
 function enqueue_custom_checkout_script() {

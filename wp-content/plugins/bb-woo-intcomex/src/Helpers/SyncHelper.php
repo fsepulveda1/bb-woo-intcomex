@@ -220,7 +220,7 @@ class SyncHelper {
         return $response;
     }
 
-    public static function syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin) {
+    public static function syncProductPrice($intcomexProduct, $USD2CLP, $profitMargin, $paymentMethodMargin) {
         $response = new ImporterResponse();
         if ($existentProduct = self::getProductBySKU($intcomexProduct->Sku)) {
             $intcomexCurrency = $intcomexProduct->Price->CurrencyId ?? null;
@@ -233,7 +233,10 @@ class SyncHelper {
             }
 
             $CLPFee = ceil($CLPPrice * ($profitMargin / 100));
-            $CLPFinalPrice = $CLPPrice + $CLPFee;
+            $CLPPreFinalPrice = $CLPPrice + $CLPFee;
+            $CLPPaymentFee = ceil($CLPPreFinalPrice * ($paymentMethodMargin / 100));
+            $CLPFinalPrice = $CLPPreFinalPrice + $CLPPaymentFee;
+
             $product = wc_get_product($existentProduct->ID);
             $product->set_price($CLPFinalPrice);
             $product->set_regular_price($CLPFinalPrice);
@@ -242,6 +245,7 @@ class SyncHelper {
             $product->update_meta_data('_intcomex_price_clp', $CLPPrice);
             $product->update_meta_data('_intcomex_price_cur', $intcomexCurrency ?? null);
             $product->update_meta_data('_intcomex_fee_clp', $CLPFee);
+            $product->update_meta_data('_intcomex_payment_fee_clp', $CLPPaymentFee);
 
 
             $product->save();

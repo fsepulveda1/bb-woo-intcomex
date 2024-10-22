@@ -101,6 +101,20 @@ class SettingsPage {
             ]
         );
 
+        add_settings_field(
+            'field_payment_method_margin',
+            __('Comisión pasarela de pago (%)', 'bwi'),
+            [$this, 'field_text'],
+            'bwi-settings',
+            'bwi_section_intcomex_general',
+            [
+                'type' => 'number',
+                'label_for' => 'field_payment_method_margin',
+                'class' => 'row',
+                'min' => 0,
+            ]
+        );
+
         add_settings_section(
             'bwi_section_icecat',
             __('Configuración Icecat API', 'bwi'),

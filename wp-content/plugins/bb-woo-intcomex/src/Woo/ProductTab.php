@@ -132,6 +132,21 @@ class ProductTab
             ]
         ) );
 
+        woocommerce_wp_text_input( array(
+            'id'            => '_intcomex_payment_fee_clp',
+            'label'         => 'Cargo método de pago',
+            'description'   => __( 'Cargo del método de pago aplicado al producto.', 'bwi' ),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'type'          => 'number',
+            'value'         => get_post_meta($product_id, '_intcomex_payment_fee_clp', true),
+            'custom_attributes' => [
+                'readonly' => 'readonly'
+            ]
+        ) );
+
+
+
 
         woocommerce_wp_textarea_input( array(
             'id'            => 'bwi_intcomex_attrs',
