@@ -172,8 +172,9 @@ class SettingsPage {
         ?>
         <input
                 type="<?= esc_attr($args['type'] ?? 'text') ?>"
-                <?= isset($args['min'])? 'min="'.esc_attr($args['min']).'"' : ""; ?>
-                <?= isset($args['max']) ? 'max="'.esc_attr($args['max']).'"' : ""; ?>
+            <?= isset($args['min'])? 'min="'.esc_attr($args['min']).'"' : ""; ?>
+            <?= isset($args['max']) ? 'max="'.esc_attr($args['max']).'"' : ""; ?>
+            <?= isset($args['step']) ? 'step="'.esc_attr($args['step']).'"' : ""; ?>
                 class="regular-text"
                 id="<?php echo esc_attr( $args['label_for'] ); ?>"
                 name="bwi_options[<?= esc_attr( $args['label_for'] ); ?>]"
