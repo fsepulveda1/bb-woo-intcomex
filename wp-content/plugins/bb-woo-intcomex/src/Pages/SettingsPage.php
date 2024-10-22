@@ -112,6 +112,7 @@ class SettingsPage {
                 'label_for' => 'field_payment_method_margin',
                 'class' => 'row',
                 'min' => 0,
+                'step' => '.5'
             ]
         );
 
