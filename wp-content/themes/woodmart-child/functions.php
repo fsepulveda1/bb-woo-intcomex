@@ -222,7 +222,7 @@ function apply_discount_for_bank_transfer($cart) {
     // Verifica si el método de pago seleccionado es transferencia bancaria
     if (isset(WC()->session->chosen_payment_method) && WC()->session->chosen_payment_method === 'bacs') {
         $options = get_option( 'bwi_options' );
-        $discount = ceil($cart->get_subtotal() * ($options['_intcomex_payment_fee_clp'] / 100));
+        $discount = ceil($cart->get_subtotal() * ($options['field_payment_method_margin'] / 100));
         $cart->add_fee(__('Descuento por Transferencia Bancaria', 'text-domain'), -$discount);
     }
 }

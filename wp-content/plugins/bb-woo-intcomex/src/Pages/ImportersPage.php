@@ -75,7 +75,8 @@ class ImportersPage {
                 'info' => [
                     'Dólar observado' => '$'.getUsdValue(),
                     'Fecha de actualización dolar' => get_option('USD2CLP_date') ? \DateTime::createFromFormat('Y-m-d',get_option('USD2CLP_date'))->format('d-m-Y') : "",
-                    'Margen de ganancia' => ($options['field_profit_margin'] ?? 0).'%'
+                    'Margen de ganancia' => ($options['field_profit_margin'] ?? 0).'%',
+                    'Cargo por método de pago' => ($options['field_payment_method_margin'] ?? 0).'%'
                 ]
             ],
             [
