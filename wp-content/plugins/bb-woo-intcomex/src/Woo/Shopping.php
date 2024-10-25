@@ -108,7 +108,7 @@ class Shopping
         }
         return [
             'AddressId' => 10,
-            'items' => $itemsArray
+            'Items' => $itemsArray
         ];
     }
 
