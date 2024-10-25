@@ -119,8 +119,8 @@ class IntcomexAPI {
      *  } $params
      * @return array|mixed
      */
-    public function placeOrder(array $params,$customerOrderNumber) {
-        return $this->post('/v1/placeorder?customerOrderNumber='.$customerOrderNumber, $params);
+    public function placeOrder(array $params,$customerOrderNumber, $carrierID = 'CLA7') {
+        return $this->post('/v1/placeorder?customerOrderNumber='.$customerOrderNumber.'&carrierId='.$carrierID, $params);
     }
 
     public function processOrder(array $params) {

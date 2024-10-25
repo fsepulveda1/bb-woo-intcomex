@@ -106,7 +106,10 @@ class Shopping
                 'StoreItemId' => $product->get_id()
             ];
         }
-        return $itemsArray;
+        return [
+            'AddressId' => 10,
+            'items' => $itemsArray
+        ];
     }
 
 
