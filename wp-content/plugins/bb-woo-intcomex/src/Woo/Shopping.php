@@ -107,6 +107,8 @@ class Shopping
             ];
         }
         return [
+            'carrierId' => 'CLA7',
+            'CustomerOrderNumber' => $order->get_id(),
             'AddressId' => 10,
             'Items' => $itemsArray
         ];
