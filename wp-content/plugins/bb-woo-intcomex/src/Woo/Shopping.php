@@ -59,29 +59,29 @@ class Shopping
 
         try {
             $orderItems = $this->getOrderItemsArray($order);
-            try {
-                $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
-            }
-            catch (\Throwable $exception) {
-              //TODO Write log if error !== 404
-            }
+            if(!empty($orderItems['Items'])) {
+                try {
+                    $intcomexOrder = $this->intcomexAPI->getOrder($order->get_id());
+                } catch (\Throwable $exception) {
+                    //TODO Write log if error !== 404
+                }
 
-            if(isset($intcomexOrder->OrderNumber)) {
-                $orderNumber = $intcomexOrder->OrderNumber;
-            }
-            else {
-                $response = $this->intcomexAPI->placeOrder($orderItems, $order->get_id());
-                $orderNumber = $response->OrderNumber;
-            }
+                if (isset($intcomexOrder->OrderNumber)) {
+                    $orderNumber = $intcomexOrder->OrderNumber;
+                } else {
+                    $response = $this->intcomexAPI->placeOrder($orderItems, $order->get_id());
+                    $orderNumber = $response->OrderNumber;
+                }
 
-            if(!$order->get_meta('bwi_intcomex_order_number')) {
-                $order->add_meta_data('bwi_intcomex_order_number', $orderNumber);
-            }
+                if (!$order->get_meta('bwi_intcomex_order_number')) {
+                    $order->add_meta_data('bwi_intcomex_order_number', $orderNumber);
+                }
 
-            if($this->order_has_virtual_items($order)) {
-                $intcomexAPI = IntcomexAPI::getInstance();
-                $tokens = $intcomexAPI->generateTokens($orderNumber);
-                $order->add_meta_data('bwi_intcomex_tokens', $tokens, true);
+                if ($this->order_has_virtual_items($order)) {
+                    $intcomexAPI = IntcomexAPI::getInstance();
+                    $tokens = $intcomexAPI->generateTokens($orderNumber);
+                    $order->add_meta_data('bwi_intcomex_tokens', $tokens, true);
+                }
             }
 
         }
@@ -100,11 +100,13 @@ class Shopping
         foreach($order->get_items() as $item) {
             $data = $item->get_data();
             $product = new \WC_Product($data['product_id']);
-            $itemsArray[] = [
-                'Sku' => $product->get_meta('bwi_intcomex_sku'),
-                'Quantity' => $item->get_quantity(),
-                'StoreItemId' => $product->get_id()
-            ];
+            if($product->get_meta('bwi_intcomex_sku')) {
+                $itemsArray[] = [
+                    'Sku' => $product->get_meta('bwi_intcomex_sku'),
+                    'Quantity' => $item->get_quantity(),
+                    'StoreItemId' => $product->get_id()
+                ];
+            }
         }
         return [
             'carrierId' => 'CLA7',
