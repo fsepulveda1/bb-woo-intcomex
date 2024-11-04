@@ -104,7 +104,7 @@ class SyncProductsData implements CronJobInterface {
                         $query->the_post();
                         $product_id = get_the_ID();
                         $product = wc_get_product($product_id);
-                        if(!$intcomexAPI->getProduct($product->get_sku())) {
+                        if(!$intcomexAPI->getProduct($product->get_sku()) && $product->get_meta('bwi_intcomex_sku')) {
                             wp_trash_post($product_id);
                         }
                     }

@@ -36,7 +36,7 @@ class SyncHelper {
                 $product->set_length($freightPackage->Length ?? null);
             }
 
-            if(!$product->get_meta('bwi_has_icecat_title')) {
+            if(!$product->get_meta('bwi_has_icecat_title') && !$product->get_meta('_bwi_exclude_title')) {
                 $product->set_name($data->Description);
             }
             $product->set_status('publish');
@@ -101,7 +101,7 @@ class SyncHelper {
                     $product->save();
                 }
 
-                if(!empty($data->Imagenes)) {
+                if(!empty($data->Imagenes) && !$product->get_meta('_bwi_exclude_img')) {
                     $mainImg = $data->Imagenes[0];
                     unset($data->Imagenes[0]);
 
@@ -134,11 +134,11 @@ class SyncHelper {
     }
 
     public static function syncProductIceCat(\WC_Product $product, $data, $forceUpdate = true) {
-        if(!empty($data['name'])) {
+        if(!empty($data['name']) && !$product->get_meta('_bwi_exclude_title')) {
             $product->set_name($data['name']);
             $product->update_meta_data('bwi_has_icecat_title',true);
         }
-        if(!empty($data['description'])) {
+        if(!empty($data['description']) && !$product->get_meta('_bwi_exclude_desc')) {
             $description = sprintf('<p>%s</p>',$data['description']);
             if(!empty($data['bullet_points'])) {
                 $description .="<ul class='bullet_points'>";
@@ -151,18 +151,18 @@ class SyncHelper {
             $product->update_meta_data('bwi_has_icecat_description',true);
 
         }
-        if(!empty($data['summary_long'])) {
+        if(!empty($data['summary_long']) && !$product->get_meta('_bwi_exclude_desc')) {
             $product->set_short_description($data['summary_long']);
         }
 
-        if(!empty(trim($data['image']))) {
+        if(!empty(trim($data['image'])) && !$product->get_meta('_bwi_exclude_img')) {
             if(!$product->get_meta('bwi_has_icecat_image') || $forceUpdate) {
                 self::removeProductImages($product);
                 self::setProductImages($data['image'],$product);
                 $product->update_meta_data('bwi_has_icecat_image',true);
             }
         }
-        if(!empty($data['gallery'])) {
+        if(!empty($data['gallery']) && !$product->get_meta('_bwi_exclude_img')) {
             if(!$product->get_meta('bwi_has_icecat_gallery') || $forceUpdate) {
                 self::removeProductImages($product, 'gallery');
                 foreach($data['gallery'] as $image) {

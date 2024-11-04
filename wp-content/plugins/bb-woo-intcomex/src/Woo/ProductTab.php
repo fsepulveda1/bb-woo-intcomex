@@ -67,6 +67,33 @@ class ProductTab
         // Populate the tab content
         echo '<div id="' . $this->tab_intcomex . '" class="panel woocommerce_options_panel">';
 
+        woocommerce_wp_checkbox([
+            'id'            => '_bwi_exclude_title',
+            'label'         => 'Exluir sincronización del título',
+            'description'   => __( 'Evita que se actualice el título del producto en la sincronización automática de productos', 'bwi' ),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'value'         => get_post_meta($product_id, '_bwi_exclude_title', true),
+        ]);
+
+        woocommerce_wp_checkbox([
+            'id'            => '_bwi_exclude_desc',
+            'label'         => 'Exluir sincronización de la descripción',
+            'description'   => __( 'Evita que se actualice la descripción del producto en la sincronización automática de productos', 'bwi' ),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'value'         => get_post_meta($product_id, '_bwi_exclude_desc', true),
+        ]);
+
+        woocommerce_wp_checkbox([
+            'id'            => '_bwi_exclude_img',
+            'label'         => 'Exluir sincronización de las imágenes',
+            'description'   => __( 'Evita que se actualicen las imágenes del producto en la sincronización automática de productos', 'bwi' ),
+            'desc_tip'      => true,
+            'class'         => 'woocommerce',
+            'value'         => get_post_meta($product_id, '_bwi_exclude_img', true),
+        ]);
+
         woocommerce_wp_text_input( array(
             'id'            => '_mpn',
             'label'         => 'MPN',
@@ -194,24 +221,18 @@ class ProductTab
             return $post_id;
 
 
-        if(isset($_POST['bwi_min_quantity'])) {
-            update_post_meta($post_id, 'bwi_min_quantity', $_POST['bwi_min_quantity']);
-        }
-        if(isset($_POST['bwi_max_quantity'])) {
-            update_post_meta($post_id, 'bwi_max_quantity', $_POST['bwi_max_quantity']);
-        }
-        if(isset($_POST['bwi_quantity_format'])) {
-            update_post_meta($post_id, 'bwi_quantity_format', $_POST['bwi_quantity_format']);
-        }
+        update_post_meta($post_id, '_bwi_exclude_title', $_POST['_bwi_exclude_title'] ?? 0);
+        update_post_meta($post_id, '_bwi_exclude_desc', $_POST['_bwi_exclude_desc'] ?? 0);
+        update_post_meta($post_id, '_bwi_exclude_img', $_POST['_bwi_exclude_img'] ?? 0);
 
         // Check if product has variations
         if( isset($product_variations) && ( !empty($product_variations) || ($product_variations !== 0) ) ) {
 
             // Interate over variations
             foreach( $product_variations as $variation ) {
-                update_post_meta($variation['variation_id'],'bwi_min_quantity', $_POST['bwi_min_quantity']);
-                update_post_meta($variation['variation_id'],'bwi_max_quantity', $_POST['bwi_max_quantity']);
-                update_post_meta($variation['variation_id'],'bwi_quantity_format', $_POST['bwi_quantity_format']);
+                update_post_meta($variation['variation_id'],'_bwi_exclude_title', $_POST['_bwi_exclude_title'] ?? 0);
+                update_post_meta($variation['variation_id'],'_bwi_exclude_desc', $_POST['_bwi_exclude_desc'] ?? 0);
+                update_post_meta($variation['variation_id'],'_bwi_exclude_img', $_POST['_bwi_exclude_img'] ?? 0);
             }
         }
     }
