@@ -145,7 +145,7 @@ class SyncProductsData implements CronJobInterface {
                 }
             }
         }
-        catch (\Exception $exception) {
+        catch (\Throwable $exception) {
             plugin_log(['error' => $exception->getMessage()],$logfile);
         }
 
