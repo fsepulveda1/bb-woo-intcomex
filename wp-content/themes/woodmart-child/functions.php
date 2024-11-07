@@ -519,7 +519,10 @@ function bb_translate_strings( $translated_text, $text, $domain ) {
             break;     
       case 'Log in' :
             $translated_text = __( 'Acceder', 'woodmart' );
-            break;                     
+            break;
+       case 'Back to %s' :
+           $translated_text = __( 'Volver a %s', 'woodmart' );
+           break;
    }
    return $translated_text;
 }

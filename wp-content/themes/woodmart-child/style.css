@@ -539,6 +539,26 @@ html body .single-product-page .product-tabs-wrapper {
     margin-bottom: 0 !important;
 }
 
+html body .wd-nav-mob-tab {
+    border-bottom: none;
+}
+html body .mobile-nav .wd-nav-opener,
+html body .wd-nav>li>a,
+html body .wd-nav-mobile>li>a,
+html body .wd-nav-mobile>li>ul li>a {
+    border-bottom: none;
+    border-left: none;
+    border-inline-end: none;
+    text-transform: none;
+}
+html body .wd-nav-mob-tab>li>a {
+    font-weight: normal;
+    font-size: .875rem;
+}
+html body .wd-nav-mob-tab>li.wd-active>a {
+    background-color: var(--wd-primary-color);
+    color: white !important;
+}
 /* RESPONSIVE */
 @media (min-width: 768px) {
     html body .page-title.title-size-default {
